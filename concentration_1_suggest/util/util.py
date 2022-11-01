@@ -113,6 +113,7 @@ class Util:
         """
 
         if user_type == 0:
+            # create directory if it doesn't exists
             robot_path_plot = "../robot/plot"
             if os.path.exists(robot_path_plot) is False:
                 os.mkdir(robot_path_plot)
