@@ -1,0 +1,86 @@
+#########################################     REWARDS     ######################################### 
+# reward_gameState_lastAction_currentAction
+
+"""
+none X none         = 10 x 10           =   100  
+none x rc           = 10 x 5            =   50
+none x card         = 10 x 0.1          =   1 
+
+rc x none - 25%     = 5 x 10 - 25%      =   50 - 12,5 = 37,5
+rc x rc             = 5 x 5             =   25
+rc x card           = 5 x 0.1           =   0.5
+
+card x none + 25%   = 0.1 x 10 + 25%    =   1 + 0.25 = 1.25
+card x rc           = 0.1 x 5           =   0.5
+card x card         = 0.1 x 0.1         =   0.01
+
+"""
+
+REWARD_SUGGEST_NONE = 10
+REWARD_SUGGEST_RC = 5
+REWARD_SUGGEST_CARD = 0.1
+
+BEGIN_STATE = 3
+MIDDLE_STATE = 1.5
+END_STATE = 0.75
+###################################################################################################
+
+
+######################################         STATES     #########################################
+# CardToFaceUp_flipping_lastSuggest_gameState
+INIT_STATE = 0
+
+FIRST_FLIPPING_NONE_BEGIN_CORRECT = 1
+FIRST_FLIPPING_NONE_BEGIN_WRONG = 2
+FIRST_FLIPPING_NONE_MIDDLE_CORRECT = 3
+FIRST_FLIPPING_NONE_MIDDLE_WRONG = 4
+FIRST_FLIPPING_NONE_END_CORRECT = 5
+FIRST_FLIPPING_NONE_END_WRONG = 6
+
+FIRST_FLIPPING_SUGGEST_RC_BEGIN_CORRECT = 7
+FIRST_FLIPPING_SUGGEST_RC_BEGIN_WRONG = 8
+FIRST_FLIPPING_SUGGEST_RC_MIDDLE_CORRECT = 9
+FIRST_FLIPPING_SUGGEST_RC_MIDDLE_WRONG  = 10
+FIRST_FLIPPING_SUGGEST_RC_END_CORRECT  = 11
+FIRST_FLIPPING_SUGGEST_RC_END_WRONG = 12
+
+FIRST_FLIPPING_SUGGEST_CARD_BEGIN_CORRECT = 13
+FIRST_FLIPPING_SUGGEST_CARD_BEGIN_WRONG = 14
+FIRST_FLIPPING_SUGGEST_CARD_MIDDLE_CORRECT = 15
+FIRST_FLIPPING_SUGGEST_CARD_MIDDLE_WRONG = 16
+FIRST_FLIPPING_SUGGEST_CARD_END_CORRECT = 17
+FIRST_FLIPPING_SUGGEST_CARD_END_WRONG = 18
+
+SECOND_FLIPPING_NONE_BEGIN_CORRECT = 19
+SECOND_FLIPPING_NONE_BEGIN_WRONG = 20
+SECOND_FLIPPING_NONE_MIDDLE_CORRECT = 21
+SECOND_FLIPPING_NONE_MIDDLE_WRONG = 22
+SECOND_FLIPPING_NONE_END_CORRECT = 23
+SECOND_FLIPPING_NONE_END_WRONG = 24
+
+SECOND_FLIPPING_SUGGEST_RC_BEGIN_CORRECT = 25
+SECOND_FLIPPING_SUGGEST_RC_BEGIN_WRONG = 26
+SECOND_FLIPPING_SUGGEST_RC_MIDDLE_CORRECT = 27
+SECOND_FLIPPING_SUGGEST_RC_MIDDLE_WRONG  = 28
+SECOND_FLIPPING_SUGGEST_RC_END_CORRECT  = 29
+SECOND_FLIPPING_SUGGEST_RC_END_WRONG = 30
+
+SECOND_FLIPPING_SUGGEST_CARD_BEGIN_CORRECT = 31
+SECOND_FLIPPING_SUGGEST_CARD_BEGIN_WRONG = 32
+SECOND_FLIPPING_SUGGEST_CARD_MIDDLE_CORRECT = 33
+SECOND_FLIPPING_SUGGEST_CARD_MIDDLE_WRONG = 34
+SECOND_FLIPPING_SUGGEST_CARD_END_CORRECT = 35
+SECOND_FLIPPING_SUGGEST_CARD_END_WRONG = 36
+###################################################################################################
+
+
+######################################         ACTION     #########################################
+SUGGEST_NONE = 0
+SUGGEST_ROW_COLUMN = 1
+SUGGEST_CARD = 2
+###################################################################################################
+
+# ENV
+
+EPISODES_WITH_HUMAN = 5
+EPISODES_WITH_AGENT = 100000
