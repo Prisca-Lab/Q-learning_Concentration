@@ -113,6 +113,10 @@ class Util:
         """
 
         if user_type == 0:
+            robot_path_plot = "../robot/plot"
+            if os.path.exists(robot_path_plot) is False:
+                os.mkdir(robot_path_plot)
+
             robot_path_png = "../robot/plot/png"
             if os.path.exists(robot_path_png):
                 return
@@ -137,6 +141,10 @@ class Util:
         
         else:
             # create parent directory
+            user_path_png_plot = "../human/plot"
+            if os.path.exists(user_path_png_plot) is False:
+                os.mkdir(user_path_png_plot)
+
             user_path_png_parent = "../human/plot/png"
             if os.path.exists(user_path_png_parent) is False:
                 os.mkdir(user_path_png_parent)
