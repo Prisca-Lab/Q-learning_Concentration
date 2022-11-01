@@ -43,6 +43,11 @@ Our state include cartesian product between:
   - the *game state* i.e. how many pairs the player has found (a game state includes 4 pairs)
   - the *user state* i.e. whether the player made match or not
 
+Each action has a value in order to assign a reward:
+  - none: 10
+  - row or column: 5
+  - card: 0.1
+
 | State\Action | None | Suggest row or column | Suggest card |
 | :---         |     :---:      |          ---: | ---: |
 | `init_state`| | | 
@@ -86,6 +91,8 @@ Our state include cartesian product between:
   - the *last action* provided by the agent in the previous turn
   - the *game state* i.e. how many pairs the player has found (a game state includes 4 pairs)
   - the *user state* i.e. whether the player made match or not and the suggestion they received on both the first and second card 
+
+The actions have the same values as already said above.
 
 | State\Action | None | Suggest row or column | Suggest card |
 | :---         |     :---:      |          ---: | ---: |
@@ -133,6 +140,14 @@ Our state include cartesian product between:
 | `SECOND_FLIPPING_CARD_END_CORRECT`| | | 
 | `SECOND_FLIPPING_CARD_END_WRONG`| | | 
 | | | 
+
+### Reward
+In this case we also need to considerate the action provided in the previous turn, so the reward is assigned as follow:
+(last_action * current_action)/(number_of_clicks_before_match/game_state).
+Some pairs are not symmetrical, for example the pair (nothing, card) is different from the pair (card, nothing) since with the first one we have a 100% match while with the second one we cannot say the same. Depending on the pair we will add or remove a bonus from the reward.
+We only have two asymmetrical pairs: 
+  - (card, none) where a 25% bonus is added since we rely on the user's memory because the suggested position is opposite to the most clicked position (of the same card)
+  - (row/column, none) where a 25% bonus is removed because the user might get confused if he finds out a card that he has never seen whereas this is not true for (none, row/column) because the user understands that the card that allows him to match is in a certain row or column
 
 ### How the agent provide a suggestion
 The suggestions on the second card work as written above.
