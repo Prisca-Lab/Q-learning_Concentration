@@ -32,7 +32,7 @@
      - ``test``, which includes some unit test
 
 ## How to train the agent
-In the robot folder: just ran "learning.py".
+In the robot folder: just run "learning.py".
 
 ## Game with 1 suggestion (suggestion for the second card)
 
