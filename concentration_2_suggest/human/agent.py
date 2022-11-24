@@ -235,8 +235,6 @@ class Agent:
         elif open_card_name == '' and robot_type == 'faulty':
             # choose less clicked card from set of visitated card
             card_name, position = self.__get_less_clicked_card(history)
-            # suggest the other location of less clicked
-            #other_pos = Card.get_other_location_of_open_card(card_name, position, game_board)
             # get which index(row or column) to suggest
             suggest, position = self.__get_which_position_to_suggest(position, open_card_position, game_board)
             print(suggest, position)
