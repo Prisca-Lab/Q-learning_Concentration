@@ -177,4 +177,3 @@ class Util:
             print("\n", pd.DataFrame(Q, states, actions))
             print("end of episode", Util.__counter)
         Util.__counter += 1
-

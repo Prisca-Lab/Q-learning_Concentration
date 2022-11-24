@@ -1,5 +1,6 @@
 from collections import namedtuple
 
+import numpy as np
 import matplotlib.pyplot as plt
 import tikzplotlib
 
@@ -13,8 +14,9 @@ class Plotting:
             "episode_rewards",                     # Reward of an episode
             "episode_click_until_match",           # How many clicks it took to find a pair in a specific episode
             "avg_of_moves_until_match",            # Average of number of moves it took to find a pair - after n episodes
-            "avg_of_suggests_in_specific_episode", # Average of suggests provided by the robot in a specific episode for each pair
-            "avg_of_suggests_after_some_episode",  # Average of suggests provided by the robot after n episodes for each pair
+            "avg_of_suggests_in_specific_episode", # Average of suggestions provided by the agent in a specific episode for each pair
+            "avg_of_suggests_after_some_episode",  # Average of suggestions provided by the agent after n episodes for each pair
+            "avg_of_suggests_first_card_over_time" # Average of suggestions provided by the agent for the first card 
         ]
     )
 
@@ -24,11 +26,14 @@ class Plotting:
     NUMBER_OF_CLICK_UNTIL_MATCH = 3
     ACTION_TAKEN_IN_SPECIFIC_EPISODE = 4
     AVERAGE_OF_ACTIONS_TAKEN = 5
+    AVERAGE_OF_ACTIONS_FIRST_CARD = 6
+    LENGTH_GAMES = 7
 
     HUMAN_PLAYER = "human"
     ROBOT_PLAYER = "robot"
 
     __array_of_suggests = [] # It is used in order to do the avg of all suggests provided by the robot for every pair.
+    __array_of_suggests_on_first_card = []
 
     @staticmethod
     def save_stats(stats, flag, episode, user_type, number_of_current_user, smoothing_window=10):
@@ -60,20 +65,22 @@ class Plotting:
                 plt.ylabel("Episode Reward")
                 plt.title("Episode Reward over Time".format(smoothing_window))
                 if user_type == Plotting.HUMAN_PLAYER:
-                    plt.savefig('plot/png/user_' + str(number_of_current_user) + '/Rewards/Rewards_after_' + str(episode) + '.png')
-                    tikzplotlib.save('plot/tex/user_' + str(number_of_current_user) + '/Rewards/Rewards_after_' + str(episode) + '.tex')
+                    plt.savefig('plot/user_' + str(number_of_current_user) + '/png/Rewards/Rewards_after_' + str(episode) + '.png')
+                    tikzplotlib.save('plot/user_' + str(number_of_current_user) + '/tex/Rewards/Rewards_after_' + str(episode) + '.tex')
                 else:
                     plt.savefig('plot/png/Rewards/Rewards_after_' + str(episode) + '.png')
                     tikzplotlib.save('plot/tex/Rewards/Rewards_after_' + str(episode) + '.tex')
 
             case Plotting.AVERAGE_EPISODE_LENGTH:
+                # save bar plot for human user, standard plot otherwise
                 plt.plot(stats[0:episode])
+
                 plt.xlabel("Episode")
                 plt.ylabel("Moves number")
                 plt.title("Game Length over Time".format(smoothing_window))
                 if user_type == Plotting.HUMAN_PLAYER:
-                    plt.savefig('plot/png/user_' + str(number_of_current_user) + '/Episode_length/Number_of_moves_after_' + str(episode) + '.png')
-                    tikzplotlib.save('plot/tex/user_' + str(number_of_current_user) + '/Episode_length/Number_of_moves_after_' + str(episode) + '.tex')
+                    plt.savefig('plot/user_' + str(number_of_current_user) + '/png/Episode_length/Number_of_moves_after_' + str(episode) + '.png')
+                    tikzplotlib.save('plot/user_' + str(number_of_current_user) + '/tex/Episode_length/Number_of_moves_after_' + str(episode) + '.tex')
                 else:
                     plt.savefig('plot/png/Episode_length/Number_of_moves_after_' + str(episode) + '.png')
                     tikzplotlib.save('plot/tex/Episode_length/Number_of_moves_after_' + str(episode) + '.tex')
@@ -84,8 +91,8 @@ class Plotting:
                 plt.ylabel("Number of clicks")
                 plt.title("Average click for each card (for episode)".format(smoothing_window))
                 if user_type == Plotting.HUMAN_PLAYER:
-                    plt.savefig('plot/png/user_' + str(number_of_current_user) + '/Avg_of_moves_until_match/AVG_of_moves_episode_after_' + str(episode) + '.png')
-                    tikzplotlib.save('plot/tex/user_' + str(number_of_current_user) + '/Avg_of_moves_until_match/AVG_of_moves_episode_after_' + str(episode) + '.tex')
+                    plt.savefig('plot/user_' + str(number_of_current_user) + '/png/Avg_of_moves_until_match/AVG_of_moves_episode_after_' + str(episode) + '.png')
+                    tikzplotlib.save('plot/user_' + str(number_of_current_user) + '/tex/Avg_of_moves_until_match/AVG_of_moves_episode_after_' + str(episode) + '.tex')
                 else:
                     plt.savefig('plot/png/Avg_of_moves_until_match/AVG_of_moves_episode_after_' + str(episode) + '.png')
                     tikzplotlib.save('plot/tex/Avg_of_moves_until_match/AVG_of_moves_episode_after_' + str(episode) + '.tex')
@@ -96,8 +103,8 @@ class Plotting:
                 plt.ylabel("Click")
                 plt.title("Click until match".format(smoothing_window))
                 if user_type == Plotting.HUMAN_PLAYER:
-                    plt.savefig('plot/png/user_' + str(number_of_current_user) + '/Episode_Click_until_match/Click_until_match_of_' + str(episode) + '.png')
-                    tikzplotlib.save('plot/tex/user_' + str(number_of_current_user) + '/Episode_Click_until_match/Click_until_match_of_' + str(episode) + '.tex')
+                    plt.savefig('plot/user_' + str(number_of_current_user) + '/png/Episode_Click_until_match/Click_until_match_of_' + str(episode) + '.png')
+                    tikzplotlib.save('plot/user_' + str(number_of_current_user) + '/tex/Episode_Click_until_match/Click_until_match_of_' + str(episode) + '.tex')
                 else:
                     plt.savefig('plot/png/Episode_Click_until_match/Click_until_match_of_' + str(episode) + '.png')
                     tikzplotlib.save('plot/tex/Episode_Click_until_match/Click_until_match_of_' + str(episode) + '.tex')
@@ -108,8 +115,8 @@ class Plotting:
                 plt.ylabel("Most suggested action")
                 plt.title("Average action provided by robot of " + str(episode) + " episode".format(smoothing_window))
                 if user_type == Plotting.HUMAN_PLAYER:
-                    plt.savefig('plot/png/user_' + str(number_of_current_user) + '/Avg_of_suggests_in_specific_episode/AVG_suggest_of_' + str(episode) + '.png')
-                    tikzplotlib.save('plot/tex/user_' + str(number_of_current_user) + '/Avg_of_suggests_in_specific_episode/AVG_suggest_of_' + str(episode) + '.tex')
+                    plt.savefig('plot/user_' + str(number_of_current_user) + '/png/Avg_of_suggests_in_specific_episode/AVG_suggest_of_' + str(episode) + '.png')
+                    tikzplotlib.save('plot/user_' + str(number_of_current_user) + '/tex/Avg_of_suggests_in_specific_episode/AVG_suggest_of_' + str(episode) + '.tex')
                 else:
                     plt.savefig('plot/png/Avg_of_suggests_in_specific_episode/AVG_suggest_of_' + str(episode) + '.png')
                     tikzplotlib.save('plot/tex/Avg_of_suggests_in_specific_episode/AVG_suggest_of_' + str(episode) + '.tex')
@@ -120,11 +127,29 @@ class Plotting:
                 plt.ylabel("Most suggested action")
                 plt.title("Average action provided by robot after " + str(episode) + " episode".format(smoothing_window))
                 if user_type == Plotting.HUMAN_PLAYER:
-                    plt.savefig('plot/png/user_' + str(number_of_current_user) + '/Avg_of_suggests_after_some_episode/AVG_suggest_after_' + str(episode) + '.png')
-                    tikzplotlib.save('plot/tex/user_' + str(number_of_current_user) + '/Avg_of_suggests_after_some_episode/AVG_suggest_after_' + str(episode) + '.tex')
+                    plt.savefig('plot/user_' + str(number_of_current_user) + '/png/Avg_of_suggests_after_some_episode/AVG_suggest_after_' + str(episode) + '.png')
+                    tikzplotlib.save('plot/user_' + str(number_of_current_user) + '/tex/Avg_of_suggests_after_some_episode/AVG_suggest_after_' + str(episode) + '.tex')
                 else:
                     plt.savefig('plot/png/Avg_of_suggests_after_some_episode/AVG_suggest_after_' + str(episode) + '.png')
                     tikzplotlib.save('plot/tex/Avg_of_suggests_after_some_episode/AVG_suggest_after_' + str(episode) + '.tex')
+
+            case Plotting.AVERAGE_OF_ACTIONS_FIRST_CARD:
+                plt.plot(stats)
+                plt.xlabel("Pairs")
+                plt.ylabel("Most suggested action")
+                plt.title("Average action for the first card provided by robot after " + str(episode) + " episode".format(smoothing_window))
+                if user_type == Plotting.HUMAN_PLAYER:
+                    plt.savefig('plot/user_' + str(number_of_current_user) + '/png/Avg_of_suggests_on_first_card/AVG_suggest_after_' + str(episode) + '.png')
+                    tikzplotlib.save('plot/user_' + str(number_of_current_user) + '/tex/Avg_of_suggests_on_first_card/AVG_suggest_after_' + str(episode) + '.tex')
+                else:
+                    plt.savefig('plot/png/Avg_of_suggests_on_first_card/AVG_suggest_after_' + str(episode) + '.png')
+                    tikzplotlib.save('plot/tex/Avg_of_suggests_on_first_card/AVG_suggest_after_' + str(episode) + '.tex')
+
+            case Plotting.LENGTH_GAMES:
+                games = np.arange(1, 6)
+                # creating the bar plot
+                plt.bar(games, stats, width = 0.4)
+
 
         plt.close(figure)
 
@@ -134,8 +159,12 @@ class Plotting:
         is_game_ended = player.get_pairs == 12          # the turn doesn't increase when game is ended
         moves_until_match = player.get_number_of_clicks_for_current_pair/2
 
-        # every even turn append robot's suggestion into the array in order to get the average
+        # every even turn append robot's suggestion into the array in order to get the average of suggestions for both card
         Plotting.__array_of_suggests.append(action)
+
+        # in order to get the average of suggestions for the first card only
+        if is_turn_even is False:
+            Plotting.__array_of_suggests_on_first_card.append(action)
 
         # if a new pair has been found
         if (is_turn_even and player.get_last_pair_was_correct) or is_game_ended:
@@ -148,13 +177,17 @@ class Plotting:
             stats.avg_of_suggests_in_specific_episode[pair] = sum(Plotting.__array_of_suggests) / len(Plotting.__array_of_suggests)
             # add up all the suggestions given by the robot to make the average later
             stats.avg_of_suggests_after_some_episode[pair] += stats.avg_of_suggests_in_specific_episode[pair]
-
+            # add up all the suggestions for the first card in order to plot the average
+            stats.avg_of_suggests_first_card_over_time[pair] += sum(Plotting.__array_of_suggests_on_first_card) / len(Plotting.__array_of_suggests_on_first_card)
+            
             # just for debug: create a file with all suggests provided by the agent
-            # it will save every 4000 times when the player is the robot, 
-            # at the end of the interation when the player is the human
+            # it will save every 4000 times when the player is the robot
             Util.save_suggests_into_file(Plotting.__array_of_suggests, player_type, episode, is_game_ended)
 
+            #print("total first suggestions: ", Plotting.__array_of_suggests_on_first_card)
+            #print("total suggestions for both cards:", Plotting.__array_of_suggests)
             Plotting.__array_of_suggests.clear()
+            Plotting.__array_of_suggests_on_first_card.clear()
 
         # cumulative reward 
         stats.episode_rewards[episode] += reward

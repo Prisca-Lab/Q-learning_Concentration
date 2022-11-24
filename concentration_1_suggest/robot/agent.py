@@ -111,8 +111,7 @@ class Agent:
     def __suggest_card(self, game):
         """
         This function will show the card and its position based on the last card clicked.
-
-        If the user has no clicked yet a card then choose the first/second position of the most clicked one. 
+ 
         Then return the other position.
         """
 
@@ -126,11 +125,17 @@ class Agent:
 
     def __suggest_row_or_col(self, board):
         """
-        Suggest the row or column of clicked card.
-        It will suggest:
-            - row, if there are more than 2 face up cards in a column and less than 4 in a row
-            - column, if there are more than 3 face up cards in a row and less than 3 in a column
-            - random between row and column otherwise
+        This function will get the row/column of the card to suggest.
+
+        Return
+        ------
+        suggest: String
+            The index to suggest: row or column
+        position: array of int
+            coordinates of suggested card. 
+                - Both >= 0 if suggest is a card.
+                - First one = -1 if suggest is column
+                - Second one = -1 if suggest is row
         """
 
         card_name = board.get_current_open_card_name
@@ -141,7 +146,7 @@ class Agent:
 
         suggest, position = self.__get_which_position_to_suggest(other_pos, game_board)
 
-        return suggest, card_name, position
+        return suggest, None, position
 
     @staticmethod
     def __get_which_position_to_suggest(position, player_board):

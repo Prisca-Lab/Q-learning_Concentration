@@ -1,7 +1,7 @@
 #########################################     REWARDS     ######################################### 
 REWARD_SUGGEST_NONE = 10
 REWARD_SUGGEST_RC = 5
-REWARD_SUGGEST_CARD = 0.1
+REWARD_SUGGEST_CARD = 0.01
 
 BEGIN_STATE = 3
 MIDDLE_STATE = 1.5

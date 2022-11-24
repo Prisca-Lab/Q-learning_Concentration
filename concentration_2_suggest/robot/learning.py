@@ -1,4 +1,4 @@
-import logging
+import random
 import numpy as np
 
 from player import Player
@@ -86,7 +86,8 @@ stats = Plotting.EpisodeStats(
     episode_click_until_match = np.zeros(PAIRS),
     avg_of_moves_until_match = np.zeros(PAIRS),
     avg_of_suggests_in_specific_episode = np.zeros(PAIRS),
-    avg_of_suggests_after_some_episode = np.zeros(PAIRS)
+    avg_of_suggests_after_some_episode = np.zeros(PAIRS),
+    avg_of_suggests_first_card_over_time = np.zeros(PAIRS)
 )
 
 def learning():
@@ -105,7 +106,7 @@ def learning():
         state = constants.INIT_STATE
 
         # for each step of episode
-        while state_is_not_terminal():
+        while game.is_game_ended() is False:
             # Choose A from S using policy derived from Q (e.g., "epsilon-greedy")
             action = select_action(Q, state, epsilon)
 
@@ -134,24 +135,55 @@ def learning():
         # for debug; print q-table with pandas every 500 times
         Util.print_Q_table(Q, states, actions, 500)
 
-    print(Q)
-
+    # print final Q
+    import pandas as pd
+    print("\n", pd.DataFrame(Q, states, actions))
     # save matrix into a file in order to use that with human player
     Util.save_Q_table_into_file(Q)
     # save epsilon for the same reason
     Util.save_epsilon_into_file(epsilon)
-
-
+    
 def select_action(Q, state, epsilon):
-    is_pairs_zero = player.get_pairs < 1
+    is_turn_less_than_seven = game.get_turn < 7
+    is_turn_odd = game.get_turn % 2 != 0
+    clicks_until_match = player.get_number_of_clicks_for_current_pair
+    pairs = player.get_pairs
 
-    if is_pairs_zero:
+    if player.get_last_pair_was_correct and is_turn_odd:
+        clicks_until_match = 0
+
+    if is_turn_less_than_seven:
+        return constants.SUGGEST_NONE
+    elif is_turn_odd and clicks_until_match < 4 and pairs > 0:
+        return constants.SUGGEST_NONE
+    elif is_turn_odd and clicks_until_match < 10 and pairs == 0:
         return constants.SUGGEST_NONE
     else:
-        if np.random.random() < epsilon:
-            return np.random.randint(3)
-        else:
-            return np.argmax(Q[state, :])
+        return epsilon_greedy(Q, state, epsilon)
+
+def epsilon_greedy(Q, state, epsilon):
+    if np.random.random() < epsilon:
+        return np.random.randint(3)
+    else:
+        return np.argmax(Q[state, :])
+
+def softmax_action(Q, state, temperature = 0.5):
+    prob = [0] * 3
+
+    den = 0
+    for i in range(3):
+        den += np.exp(Q[state, i]/temperature, dtype=np.longdouble)
+
+    for i in range(3):
+        num = np.exp(Q[state, i]/temperature, dtype=np.longdouble)
+        prob[i] = num/den
+    
+    action = np.random.choice([constants.SUGGEST_NONE, 
+                               constants.SUGGEST_ROW_COLUMN, 
+                               constants.SUGGEST_CARD], 
+                               p=prob)
+
+    return action
 
 def step(state, action):
     """
@@ -164,22 +196,21 @@ def step(state, action):
     # click a card and follow the suggest
     clicked_card, pos, match = player.play(suggest, card, position, game)
     
-    next_state = agent.get_next_state(action, game.get_face_up_cards, 
+    next_state = agent.get_next_state(action, game.get_face_up_cards, game.get_turn,
                                       player.get_pairs, player.get_last_pair_was_correct)
 
     reward = agent.get_reward(state, action, player, game)
     
-    logging.debug("Current turn:", game.get_turn - 1)
-    logging.debug("Current state:", states[state])
-    logging.debug("Action", action)
-    logging.debug("Suggest:", suggest, card, position)
-    logging.debug("Clicked:", clicked_card, pos, match, player.get_number_of_clicks_for_current_pair)
-    logging.debug("Reward", reward, "\n")
+    """print("Current turn:", game.get_turn - 1)
+    print("Current state:", states[state])
+    print("Action", action)
+    print("Suggest:", suggest, card, position)
+    print("Clicked:", clicked_card, pos, match, player.get_number_of_clicks_for_current_pair)
+    print("Face up cards:", game.get_face_up_cards)
+    print("Pairs", player.get_pairs)
+    print("Reward", reward, "\n")"""
 
     return next_state, reward
-
-def state_is_not_terminal():
-    return player.get_pairs != 12
 
 def get_new_learning_rate(current_learning_rate, episode, start_lr = 0.1, taper_lr = 0.001):
     if current_learning_rate < 0.96:
@@ -223,6 +254,11 @@ def print_stats(episode):
         # total reward for each episode
         avg_rewards = Util.get_cumulative_avg(stats.episode_rewards, episode)
         Plotting.save_stats(avg_rewards, Plotting.AVERAGE_EPISODE_REWARDS, episode, Plotting.ROBOT_PLAYER, 0)
+
+        # suggestions for the first card
+        avg_suggestion_first_card = Util.get_avarage(stats.avg_of_suggests_first_card_over_time, PAIRS, episode)
+        Plotting.save_stats(avg_suggestion_first_card, Plotting.AVERAGE_OF_ACTIONS_FIRST_CARD,
+                            episode, Plotting.ROBOT_PLAYER, 0)
 
 
 if __name__ == "__main__":

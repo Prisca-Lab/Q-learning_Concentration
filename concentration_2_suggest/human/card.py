@@ -45,6 +45,85 @@ class Card:
         return card, position, which_is_clicked
 
     @staticmethod
+    def get_available_cards_and_position(board):
+        """
+        This function will return all the cards which can be clicked.
+
+        Parameters
+        ----------
+        board: dictionary
+            The board of the game.
+
+        Returns
+        -------
+        available_cards: dictionary
+            All name and coordinates of cards that can be clicked
+
+        """
+
+        available_cards = {}
+        for k, v in board.items():
+            if board[k]['founded'] is False:
+                is_first_clicked = board[k]['is_first_opened']
+                is_second_clicked = board[k]['is_second_opened']
+
+                if is_first_clicked:
+                    available_cards[k] = {'first_pos': None, 'second_pos': v['second_pos']}
+                elif is_second_clicked:
+                    available_cards[k] = {'first_pos': v['first_pos'], 'second_pos': None}
+                else:  # both position can be clicked
+                    available_cards[k] = {'first_pos': v['first_pos'], 'second_pos': v['second_pos']}
+
+        return available_cards
+
+    @staticmethod
+    def get_available_cards_by_suggest(suggest, number_suggested, board):
+        """
+        This function will return all cards that robot can click based on row or column suggested.
+
+        Parameters
+        ----------
+        suggest: string
+            The robot suggest: row or column
+        number_suggested: int
+            The number of row/column suggested
+        history: dictionary
+            The history of game used to get all available cards of specific row/column 
+
+        Returns
+        -------
+        available_cards: dictionary
+            A dictionary which contains all name and position that can be clicked
+        """
+
+        hint = 0 if suggest == 'row' else 1
+
+        available_cards = {}
+        for k, v in board.items():
+            if board[k]['founded'] is False:
+                is_first_clicked = board[k]['is_first_opened']
+                is_second_clicked = board[k]['is_second_opened']
+                is_first_valid = board[k]['first_pos'][hint] == number_suggested
+                is_second_valid = board[k]['second_pos'][hint] == number_suggested
+
+                if is_first_clicked and is_second_valid:
+                    available_cards[k] = {'first_pos': None, 'second_pos': v['second_pos']}
+
+                elif is_second_clicked and is_first_valid:
+                    available_cards[k] = {'first_pos': v['first_pos'], 'second_pos': None}
+
+                elif is_first_valid and is_second_valid:
+                    available_cards[k] = {'first_pos': v['first_pos'], 'second_pos': v['second_pos']}
+
+                else:
+                    if is_first_valid:
+                        available_cards[k] = {'first_pos': v['first_pos'], 'second_pos': None}
+                    elif is_second_valid:
+                        available_cards[k] = {'first_pos': None, 'second_pos': v['second_pos']}
+
+        return available_cards
+
+    @staticmethod
     def get_other_location_of_open_card(card, position, board):
         """
         Return the other position of a face up card
@@ -125,6 +204,7 @@ class Card:
         Returns a new dictionary containing cards and positions of the most clicked cards
         """
         max_click = self.get_max_clicks(history)
+        print("Max click of a card", max_click)
 
         cards = {}
         for key, v in history.items():
@@ -151,6 +231,58 @@ class Card:
         return cards
     
     @staticmethod
+    def get_min_clicks(history):
+        """
+        Returns the number of times of the less clicked card
+        """
+
+        # get first_location max
+        # we check if it's open just for robustness
+        min_first = min([k['times_that_first_was_clicked'] for k in history.values() if 
+                        k['is_first_opened'] is False and k['founded'] is False and k['times_that_first_was_clicked'] > 0], default=0)
+        # get second_location_max
+        min_second = min([k['times_that_second_was_clicked'] for k in history.values() if
+                         k['is_second_opened'] is False and k['founded'] is False and k['times_that_second_was_clicked'] > 0], default = 0)
+
+        if min_first == 0 and min_second > 0:
+            return min_second
+        elif min_first > 0 and min_second == 0:
+            return min_first
+        else:
+            return min_first if min_first < min_second else min_second
+
+    def get_less_clicked_cards(self, history):
+        """
+        Returns a new dictionary containing cards and positions of the most clicked cards
+        """
+        min_click = self.get_min_clicks(history)
+        print("Min click of a card", min_click)
+
+        cards = {}
+        for key, v in history.items():
+            is_founded = history[key]['founded']
+
+            if is_founded is False:
+                click_of_first = history[key]['times_that_first_was_clicked']
+                click_of_second = history[key]['times_that_second_was_clicked']
+
+                is_first_clicked = history[key]['is_first_opened']
+                is_second_clicked = history[key]['is_second_opened']
+
+                both_face_down = is_first_clicked is False and is_second_clicked is False
+
+                if click_of_first == min_click and click_of_second == min_click and both_face_down:
+                    cards[key] = {'first_pos': v['first_pos'], 'second_pos': v['second_pos']}
+
+                elif click_of_first == min_click and (is_second_clicked or click_of_second > min_click or click_of_second == 0):
+                    cards[key] = {'first_pos': v['first_pos'], 'second_pos': None}
+
+                elif click_of_second == min_click and (is_first_clicked or click_of_first > min_click  or click_of_second == 0):
+                    cards[key] = {'first_pos': None, 'second_pos': v['second_pos']}
+
+        return cards
+
+    @staticmethod
     def get_which_is_open(card, board):
         """
         Returns a flag to figure out which card location is face up
@@ -165,3 +297,5 @@ class Card:
         """
 
         return 'is_first_opened' if board[card]['first_pos'] == position else 'is_second_opened'
+
+    

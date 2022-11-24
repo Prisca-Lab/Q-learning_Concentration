@@ -26,6 +26,10 @@ let seconds = 0;
 let minutes = 0;
 let t;
 
+let myMinutes = 0;
+let mySeconds = 0;
+let myT;
+
 
 const showStar = ['<li><i class="fa fa-star"></i></li><li><i class="fa fa-star-o"></i></li><li><i class="fa fa-star-o"></i></li>',  // 1 star
                   '<li><i class="fa fa-star"></i></li><li><i class="fa fa-star"></i></li><li><i class="fa fa-star-o"></i></li>',  // 2 stars
@@ -37,7 +41,7 @@ const showStar = ['<li><i class="fa fa-star"></i></li><li><i class="fa fa-star-o
 // Send data to flask
 // ============================================
 function sendFlask(flag, data){
-  fetch('http://192.168.1.61:5000/', {
+  fetch('http://100.74.3.244:5000/', {
         headers : {
             'Content-Type': 'application/json',
             'Accept': 'application/json'
@@ -68,6 +72,9 @@ function checkFirstVisit() {
   if(document.cookie.indexOf('mycookie')==-1) {
     // cookie doesn't exist, create it now
     document.cookie = 'mycookie=1';
+  }else {
+    // not first visit
+    sendFlask("refreshed", "True");
   }
 }
 
@@ -99,18 +106,47 @@ function shuffle(array) {
 // color the card suggested by robot
 function hintReceivedByRobot(){
     // sending a connect request to the server.
-    socket = io.connect('http://192.168.56.1:5000/');
+    socket = io.connect('http://100.74.3.244:5000/');
   
     socket.on('robot_hint', function(msg) {
-      hint_cards = msg.data
-      if(hint_cards.length > 0){
-        document.querySelectorAll(".card").forEach((card) => { 
-          if(hint_cards.includes(Number(card.id)))
-            card.classList.add('hint');
-        });
-      }
+        const obj = JSON.parse(msg);
+
+        lookRobotPopup()
+
+        // color the card suggested or color each card of the row/column suggested (if they aren't already open)
+        setTimeout(
+            function open(event){
+                const suggestion = obj.action.suggestion
+        
+                const row = obj.action.position[0] - 1
+                const col = obj.action.position[1] - 1
+                
+                document.querySelectorAll(".card").forEach((card) => {
+                    if(card.classList.contains("flipInY") == true && (turns + 1) % 2 != 0)
+                        card.classList.remove('flipInY')
+
+                    if(card.classList.contains("match") == false && card.classList.contains("flipInY") == false){
+                        if(suggestion == "row"){
+                            if(row == Math.floor(card.id/6))
+                                card.classList.add('hint');
+                        }
+
+                        if(suggestion == "column"){
+                            if(col == card.id % 6)
+                                card.classList.add('hint');
+                        }
+                    }
+
+                    if(suggestion == "card"){
+                        if(row == Math.floor(card.id/6) && (col == card.id % 6))
+                            card.classList.add('hint');
+                    }
+                });    
+            }, 3000
+        );
     });
 }
+
 
 function initGame() {
     document.querySelector('.overlay').style.display = 'none';
@@ -129,6 +165,8 @@ function initGame() {
 
     resetTimer();
     runTimer();
+    myResetTimer();
+    myRunTimer();
     printStars();
     printMoves();
 
@@ -148,101 +186,83 @@ function initGame() {
     // 6. If reach maximum pairs, end the game, show congrats message
     // ============================================
 
-    document.querySelectorAll(".card").forEach((card) => {  
+    
+    document.querySelectorAll(".card").forEach((card) => { 
+        //card.classList.remove('hint')
         card.addEventListener("click", function () {
+            // set a timeout in order to give some time to robot for saying the suggestions
+            setTimeout(function(){
 
-            // remove hint cause card has been clicked
-            card.classList.remove('hint')
+                // remove hint cause card has been clicked
+                document.querySelectorAll(".card").forEach((card) => { 
+                    card.classList.remove('hint')
+                    card.classList.remove('flipInY')
+                });
 
-            if (card.classList.contains('show')){
-                return; // exit function if the card is already opened.
-            }
-
-            card.classList.add('show','animated','flipInY');
-
-            let currentCard = card.innerHTML;
-            opened.push(currentCard);
-
-            // get name of image without path and format
-            var filename = currentCard.replace(/^.*[\\\/]/, '')
-            var clicked_card_name = filename.replace(/\..+$/, '');
-
-            // get card position
-            var positionCard = Number(this.id);
-            var index_row = Math.floor(positionCard/6)
-            var index_col = positionCard % 6
-            
-            // create coordinates of the clicked card
-            clicked_card_position = [];
-            clicked_card_position.push(index_row, index_col);
-
-        
-            face_up_cards = 1;
-
-            if(opened.length > 1) {
-                face_up_cards = 2;
-            
-                if(currentCard === opened[0]) {
-                    match();
-                    pairs_found ++;
-                    sendFlask("data",
-                        {
-                            "clicked_card_name": clicked_card_name,
-                            "clicked_card_position": clicked_card_position,
-                            "n_face_up": face_up_cards,
-                            "match": [
-                            true,
-                            numMatch
-                            ]
-                        }
-                    )
-                } else {
-                    unmatch();
-                    sendFlask("data",
-                        {
-                            "clicked_card_name": clicked_card_name,
-                            "clicked_card_position": clicked_card_position,
-                            "n_face_up": face_up_cards,
-                            "match": [
-                                false,
-                                0
-                            ]
-                        }
-                    )
+                if (card.classList.contains('show')){
+                    return; // exit function if the card is already opened.
                 }
-            } else {
-                sendFlask("data",
-                    {
-                        "clicked_card_name": clicked_card_name,
-                        "clicked_card_position": clicked_card_position,
-                        "n_face_up": face_up_cards,
-                        "match": [
-                            false,
-                            0
-                        ]
+
+                card.classList.add('show','animated','flipInY');
+
+                let currentCard = card.innerHTML;
+                opened.push(currentCard);
+
+                // get name of image without path and format
+                var filename = currentCard.replace(/^.*[\\\/]/, '')
+                var clicked_card_name = filename.replace(/\..+$/, '');
+
+                // get card position
+                var positionCard = Number(card.id);
+                var index_row = Math.floor(positionCard/6)
+                var index_col = positionCard % 6
+                
+                // create coordinates of the clicked card
+                clicked_card_position = [];
+                clicked_card_position.push(index_row, index_col);
+
+                face_up_cards = 1;
+
+                if(opened.length > 1) {
+                    face_up_cards = 2;
+                
+                    if(currentCard === opened[0]) {
+                        match();
+                    } else {
+                        unmatch();
                     }
-                )
-                is_match = false;
-            }
-        
-            starCount(); 
-            printMoves();
+                } else {
+                    is_match = false;
+                }
+            
+                starCount(); 
+                printMoves();
 
-            if(numMatch === maxMatch ) {
-                stopTimer();
-                congrats();
-            }
+                if(numMatch === maxMatch ) {
+                    stopTimer();
+                    congrats();
+                }
 
-            turns++;
+                turns++;
 
-            sendFlask("game", {
-                "open_card_name": clicked_card_name,
-                "open_card_position": clicked_card_position,
-                "pairs": pairs_found,
-                "turn": turns,
-                "match": is_match
-            });
-        })
+                timeUntilMatch = myMinutes + ":" + mySeconds
+                
+                sendFlask("game", {
+                    "open_card_name": clicked_card_name,
+                    "position": clicked_card_position,
+                    "pairs": numMatch,
+                    "turn": turns,
+                    "match": is_match,
+                    "n_face_up": face_up_cards,
+                    "time_until_match": timeUntilMatch
+                });
+
+                if(is_match){
+                    myMinutes = 0
+                    mySeconds = 0
+                }
+            }, 10);
+        });
     });
 };
 
@@ -251,7 +271,6 @@ initGame();
 // ============================================
 // Match + Unmatch function
 // ============================================
-
 
 function match() {
     numMoves++;
@@ -290,9 +309,9 @@ function unmatch() {
 
 function starCount() {
 
-    if(numMoves < 34) {
+    if(numMoves < 25) {
         numStars = 3;
-    } else if (numMoves < 40) {
+    } else if (numMoves < 30) {
         numStars = 2;
     } else {
         numStars = 1;
@@ -323,6 +342,19 @@ function twoDigits(number) {
        return (number < 10 ? '0' : '') + number;
 }
 
+function myTimer() {
+    mySeconds++
+    if(mySeconds >= 60){
+        mySeconds = 0
+        myMinutes ++;
+    }
+    myRunTimer();
+}
+
+function myRunTimer() {
+    myT = setTimeout(myTimer, 1000);
+}
+
 
 function timer() {
     seconds++;
@@ -337,7 +369,7 @@ function timer() {
 
 
 function runTimer() {
-  t = setTimeout(timer, 1000);
+    t = setTimeout(timer, 1000);
 }
 
 function resetTimer() {
@@ -346,15 +378,23 @@ function resetTimer() {
     updateTimer()
 }
 
+function myResetTimer() {
+    myStopTimer();
+    mySeconds = 0; myMinutes = 0;
+}
+
 function updateTimer(){
     document.querySelectorAll(".timer-seconds").forEach(item=> item.textContent = twoDigits(seconds));
     document.querySelectorAll(".timer-minutes").forEach(item=> item.textContent = twoDigits(minutes));
 }
 
 function stopTimer() {
-  clearTimeout(t);
+    clearTimeout(t);
 }
 
+function myStopTimer(){
+    clearTimeout(myT)
+}
 
 // ============================================
 // Restart
@@ -375,6 +415,27 @@ const finishImg = ['walrus', 'penguin','tiger'];
 const finishMsg = ['Oh man... even a walrus can do better','Good job, pal! Well done','Geez, That\'s amazing!'];
 
 
+function lookRobotPopup() {
+    stopTimer();
+    myStopTimer();
+
+    document.querySelector('.msg').innerHTML = 
+        `
+            <img src="/static/images/robot.svg" alt="" width="250">
+        `
+        document.querySelector('.suggestion-content').classList.add('animated','bounceIn')
+
+    setTimeout(function(){
+        document.querySelector('.suggestion').style.display = 'block'
+    }, 10);
+
+    setTimeout(function(){
+        runTimer();
+        myRunTimer();
+        document.querySelector(".suggestion").style.display = "none";
+    }, 8000)
+}
+
 function congrats() {
     stopTimer();
     setTimeout(function(){
@@ -390,10 +451,4 @@ function congrats() {
     setTimeout(function(){
         document.querySelector('.overlay').style.display = 'block'
     }, 300);
-
-    var results = {
-        "moves": numMoves,
-        "minutes": minutes,
-        "seconds": seconds
-    };
 };

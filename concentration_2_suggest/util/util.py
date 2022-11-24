@@ -3,8 +3,11 @@ import json
 import os
 import numpy as np
 import pandas as pd
+import csv
 
 import constants
+
+from pathlib import Path
 
 class Util:
     __list_of_suggests_in_episode = []  # in order to write the suggestions in a file
@@ -40,7 +43,11 @@ class Util:
     @staticmethod
     def save_suggests_into_file(array_suggest, player_type, episode, is_game_ended):
         Util.__list_of_suggests_in_episode.append(list(array_suggest))
-        file_name = "hints" if player_type == "robot" else "hints_with_human"
+        if player_type == "robot":
+            file_name = "hints" 
+        else: 
+            return
+            
         # if it's the first run then clean the file
         if episode == 0:
             open('../util/' + file_name + '.txt', 'w').close()
@@ -48,10 +55,6 @@ class Util:
         # write the contents of list in a file every 4000 episode
         if (player_type == "robot" and episode % 4000 == 0 and is_game_ended and episode != 0) or \
             (episode == 99999 and is_game_ended):
-            Util.__write_on_file(file_name)
-
-        # write all suggestions provided in all episodes when the player is human
-        if player_type == "human" and episode == constants.EPISODES_WITH_HUMAN - 1 and is_game_ended:
             Util.__write_on_file(file_name)
 
     @staticmethod
@@ -132,6 +135,7 @@ class Util:
             os.mkdir(robot_path_png + "/Episode_Click_until_match")
             os.mkdir(robot_path_png + "/Rewards")
             os.mkdir(robot_path_png + "/Episode_length")
+            os.mkdir(robot_path_png + "/Avg_of_suggests_on_first_card")
             # tex file
             robot_path_tex = "../robot/plot/tex"
             if os.path.exists(robot_path_tex):
@@ -143,6 +147,7 @@ class Util:
             os.mkdir(robot_path_tex + "/Episode_Click_until_match")
             os.mkdir(robot_path_tex + "/Rewards")
             os.mkdir(robot_path_tex + "/Episode_length")
+            os.mkdir(robot_path_tex + "/Avg_of_suggests_on_first_card")
         
         else:
             # create parent directory
@@ -150,12 +155,11 @@ class Util:
             if os.path.exists(user_path_png_plot) is False:
                 os.mkdir(user_path_png_plot)
 
-            user_path_png_parent = "../human/plot/png"
-            if os.path.exists(user_path_png_parent) is False:
-                os.mkdir(user_path_png_parent)
-            # create in parent directory a folder for plots
-            user_path_png_child = "../human/plot/png/user_" + str(user_number)
+            user_path_png_parent = "../human/plot/user_" + str(user_number)
+            os.mkdir(user_path_png_parent)
+            user_path_png_child = "../human/plot/user_" + str(user_number) + "/png"
             os.mkdir(user_path_png_child)
+            # create in parent directory a folder for plots
             os.mkdir(user_path_png_child + "/Avg_of_suggests_in_specific_episode")
             os.mkdir(user_path_png_child + "/Avg_of_moves_until_match")
             os.mkdir(user_path_png_child + "/Avg_of_suggests_after_some_episode")
@@ -163,10 +167,7 @@ class Util:
             os.mkdir(user_path_png_child + "/Rewards")
             os.mkdir(user_path_png_child + "/Episode_length")
             # for tex file
-            user_path_tex_parent = "../human/plot/tex"
-            if os.path.exists(user_path_tex_parent) is False:
-                os.mkdir(user_path_tex_parent)
-            user_path_tex_child = "../human/plot/tex/user_" + str(user_number)
+            user_path_tex_child = "../human/plot/user_" + str(user_number) + "/tex"
             os.mkdir(user_path_tex_child)
             os.mkdir(user_path_tex_child + "/avg_of_suggests_in_specific_episode")
             os.mkdir(user_path_tex_child + "/Avg_of_moves_until_match")
@@ -182,6 +183,21 @@ class Util:
             print("end of episode", Util.__counter)
         Util.__counter += 1
 
+    @staticmethod
+    def put_data_in_csv(csv_data, id_player):
+        file_path = Path("../human/plot/user_" + str(id_player) + "/game_data.csv")
+        keys = csv_data.keys()
+        print("keys:", keys)
 
-
-
+        if file_path.is_file() is False:
+            # add header
+            with open(file_path, "a+", newline='') as outfile:
+                writer = csv.writer(outfile, delimiter = ";")
+                # write header only if file doesn't exists
+                writer.writerow(keys)
+                writer.writerows(list(zip(*[csv_data[key] for key in keys])))
+        else:
+            # if it does exists do not add the header
+            with open(file_path, "a+", newline='') as outfile:
+                writer = csv.writer(outfile, delimiter = ";")
+                writer.writerows(list(zip(*[csv_data[key] for key in keys])))

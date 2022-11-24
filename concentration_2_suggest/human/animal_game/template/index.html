@@ -24,6 +24,13 @@
         </div>
     </div>
 
+    <div class="suggestion">
+        <div class="suggestion-content">
+            <section class="msg"></section>
+            <h2> Hey, il robot sta per dire qualcosa! </h2>
+        </div>
+    </div>
+
 
     <div class="container">
         <header>
@@ -36,9 +43,11 @@
         	<span class="moves">0</span> Moves
             <span class="timer"><span class="timer-minutes">0</span>:<span class="timer-seconds">00</span></span>
 
+            <!--
+                Remove restart: the user could accidentaly click it
             <div class="restart">
         		<i class="fa fa-repeat"></i> Restart
-        	</div>
+        	</div>-->
         </section>
 
         <ul class="deck"></ul>
@@ -58,6 +67,5 @@
           hintReceivedByRobot()    
         });
      </script>
-      
 </body>
 </html>

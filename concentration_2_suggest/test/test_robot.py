@@ -47,14 +47,16 @@ class RobotTestCase(unittest.TestCase):
 
 
     def test_if_return_next_state_correctly(self):
-        SUGGEST_ROW_COLUMN = 1
-        SECOND_FLIPPING_SUGGEST_RC_MIDDLE_WRONG = 28
+        SUGGEST_CARD = 2
+        SECOND_FLIPPING_SUGGEST_CARD_BEGIN_CORRECT = 31
         face_up_cards = 1 
-        founded_pairs = 4   # middle
-        last_match = False  
-        next_state = self.agent.get_next_state(SUGGEST_ROW_COLUMN, face_up_cards, 
+        founded_pairs = 3 # begin
+        turn = 8
+        last_match = True 
+        next_state = self.agent.get_next_state(SUGGEST_CARD, face_up_cards, turn,
                                                founded_pairs, last_match)
-        self.assertEqual(next_state, SECOND_FLIPPING_SUGGEST_RC_MIDDLE_WRONG)
+        self.assertEqual(next_state, SECOND_FLIPPING_SUGGEST_CARD_BEGIN_CORRECT)
+
 
     
     def test_checks_if_the_suggestion_provided_is_the_same_as_the_action_passed_as_the_argument(self):
@@ -76,10 +78,10 @@ class RobotTestCase(unittest.TestCase):
         self.player.set_pairs = 4                       # middle state
         SECOND_FLIPPING_SUGGEST_RC_MIDDLE_WRONG  = 28   # current state with last action RC
         SUGGEST_ROW_COLUMN = 1                          # current action
-        REWARD_RC = 5
-        MIDDLE_STATE = 1.5
+        REWARD_RC = 0.1
+        MIDDLE_STATE = 2
 
-        result = (REWARD_RC * REWARD_RC)/(clicks_until_match/MIDDLE_STATE)
+        result = REWARD_RC * clicks_until_match * MIDDLE_STATE
         
 
         reward = self.agent.get_reward(SECOND_FLIPPING_SUGGEST_RC_MIDDLE_WRONG, SUGGEST_ROW_COLUMN, 

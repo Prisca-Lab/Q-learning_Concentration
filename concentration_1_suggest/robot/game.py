@@ -18,6 +18,7 @@ class Game:
         self._current_open_card_position = []
         self._board = {}
         self._turn = 1
+        self._found_pairs = 0
 
     ##################################################################################################################
     #                                             GETTER/SETTER                                                      #
@@ -122,6 +123,7 @@ class Game:
 
         if is_turn_even and match:
             self._board[clicked_card_name]['founded'] = True
+            self._found_pairs += 1
 
         self._turn += 1
 
@@ -251,6 +253,9 @@ class Game:
 
     def print_board(self):
         print(json.dumps(self._board, indent=4))
+
+    def is_game_ended(self):
+        return self._found_pairs == 12
 
     @staticmethod
     def __check_if_match(first_card, second_card):

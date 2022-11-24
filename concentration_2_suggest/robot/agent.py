@@ -12,9 +12,13 @@ from card import Card
 
 
 class Agent:
-    def get_next_state(self, action, face_up_cards, pairs, last_match):
+
+    __reward_first_card = 0.4
+    __has_suggests_for_the_first_card = False
+
+    def get_next_state(self, action, face_up_cards, turn, pairs, last_match):
         # init state
-        if pairs == 0:
+        if turn < 7 and pairs == 0:
             return constants.INIT_STATE
 
         if pairs <= 3:
@@ -108,6 +112,10 @@ class Agent:
         else:
             return states[2]
 
+    ##################################################################################################################
+    #                                                 ACTION                                                         #
+    ##################################################################################################################
+
     def take_action(self, action, player, game):
         """
         This function will return the suggest provided by the robot.
@@ -182,9 +190,19 @@ class Agent:
 
     def __suggest_row_or_col(self, player, game):
         """
-        Suggest the row or column of clicked card.
+        This function will get the row/column of the card to suggest.
             - If there is no open card yet then it will suggest the other position of one of most clicked cards.
             - It will suggest the other position of a face up card otherwise.
+
+        Return
+        ------
+        suggest: String
+            The index to suggest: row or column
+        position: array of int
+            coordinates of suggested card. 
+                - Both >= 0 if suggest is a card.
+                - First one = -1 if suggest is column
+                - Second one = -1 if suggest is row
         """
 
         card_name = ''
@@ -245,78 +263,78 @@ class Agent:
             else:
                 return 'column', [-1, column]
 
+    ##################################################################################################################
+    #                                                 REWARD                                                         #
+    ##################################################################################################################
+
     def get_reward(self, state, action, player, game):
-        if game.get_face_up_cards == 1:
+        clicks_until_match = player.get_number_of_clicks_for_current_pair
+        pairs = player.get_pairs
+        has_found_pair = player.get_last_pair_was_correct
+        is_turn_even = (game.get_turn - 1) % 2 == 0
+        face_up_cards = game.get_face_up_cards
+
+        # for the first seven turns the agent can't provide any suggestion, thus the reward is 0
+        if game.get_turn < 7 and pairs == 0:
             return 0
 
-        if player.get_last_pair_was_correct:
-            pairs = player.get_pairs
-            clicks_until_match = player.get_number_of_clicks_for_current_pair
+        # suggestion for the first card
+        if face_up_cards == 1 and ((clicks_until_match > 4 and pairs > 0 ) or (clicks_until_match > 9 and pairs == 0)):
+            return self.__get_reward_for_first_card(action, clicks_until_match, pairs)
 
-            n = self.__get_divide_correct_state_for_clicks(pairs, clicks_until_match)
-            return self.__get_reward_by_state_action_pair(state, action, n)
-        else:
+        # if the suggestion on the first was usless then reset the reward
+        if is_turn_even and has_found_pair is False and self.__has_suggests_for_the_first_card:
+            self.__reward_first_card = 0.4
+
+        # If the agent provided a suggestion for the first card, he shouldn't suggest again
+        if is_turn_even and has_found_pair and self.__has_suggests_for_the_first_card and action != 0:
+            self.__reward_first_card = 0.4
+            self.__has_suggests_for_the_first_card = False
             return 0
+        
+        # if the player has found a pair
+        if has_found_pair and is_turn_even:
+            return self.__get_reward_for_second_card(action, pairs, clicks_until_match)
+        
+        return 0
+
+    def __get_reward_for_first_card(self, action):
+            if action != constants.SUGGEST_NONE:
+                self.__has_suggests_for_the_first_card = True
+            else:
+                self.__has_suggests_for_the_first_card = False
+
+            if action == constants.SUGGEST_ROW_COLUMN:
+                self.__reward_first_card += 0.1
+            elif action == constants.SUGGEST_CARD:
+                self.__reward_first_card += 0.3
+            else:
+                self.__reward_first_card += 0.4
+            return self.__reward_first_card
+
+    def __get_reward_for_second_card(self, action, pairs, clicks_until_match):
+        self.__has_suggests_for_the_first_card = False
+        self.__reward_first_card = 0.4  # reset the reward for the first card
+        n = self.__multiply_state_for_clicks(pairs, clicks_until_match)    
+        return self.__get_reward_by_state_action_pair(action, n)
 
     @staticmethod
-    def __get_divide_correct_state_for_clicks(pairs, clicks):
+    def __multiply_state_for_clicks(pairs, clicks):
         if pairs <= 3:
-            return clicks / constants.BEGIN_STATE
+            return clicks * constants.BEGIN_STATE
         elif 3 < pairs < 8:
-            return clicks / constants.MIDDLE_STATE
+            return clicks * constants.MIDDLE_STATE
         else:
-            return clicks / constants.END_STATE
+            return clicks * constants.END_STATE
 
-    def __get_reward_by_state_action_pair(self, state, action, state_clicks):
-        last_action = self.__get_last_action(state)
-
+    @staticmethod
+    def __get_reward_by_state_action_pair(action, state_click):
         match action:
             case constants.SUGGEST_NONE:
-                if last_action == "none":
-                    return (constants.REWARD_SUGGEST_NONE * constants.REWARD_SUGGEST_NONE) / state_clicks
-                elif last_action == "row_column":
-                    res = constants.REWARD_SUGGEST_RC * constants.REWARD_SUGGEST_NONE 
-                    percentage = Util.get_percentage(25, res)
-                    return (res - percentage) / state_clicks
-                else:
-                    return (constants.REWARD_SUGGEST_CARD * constants.REWARD_SUGGEST_NONE) / state_clicks
+                return constants.REWARD_SUGGEST_NONE / state_click
 
             case constants.SUGGEST_ROW_COLUMN:
-                if last_action == "none":
-                    return (constants.REWARD_SUGGEST_NONE * constants.REWARD_SUGGEST_RC) / state_clicks
-                elif last_action == "row_column":
-                    return (constants.REWARD_SUGGEST_RC * constants.REWARD_SUGGEST_RC) / state_clicks
-                else:
-                    return (constants.REWARD_SUGGEST_CARD * constants.REWARD_SUGGEST_RC) / state_clicks
+                return constants.REWARD_SUGGEST_RC * state_click
 
             case constants.SUGGEST_CARD:
-                if last_action == "none":
-                    res = constants.REWARD_SUGGEST_NONE * constants.REWARD_SUGGEST_CARD
-                    percentage = Util.get_percentage(25, res)
-                    return (res + percentage) / state_clicks
-                elif last_action == "row_column":
-                    return (constants.REWARD_SUGGEST_RC * constants.REWARD_SUGGEST_CARD) / state_clicks
-                else:
-                    return (constants.REWARD_SUGGEST_CARD * constants.REWARD_SUGGEST_CARD) / state_clicks
-
-    @staticmethod
-    def __get_last_action(state):
-        if state == constants.SECOND_FLIPPING_NONE_BEGIN_CORRECT or \
-                state == constants.SECOND_FLIPPING_NONE_BEGIN_WRONG or \
-                state == constants.SECOND_FLIPPING_NONE_MIDDLE_CORRECT or \
-                state == constants.SECOND_FLIPPING_NONE_MIDDLE_WRONG or \
-                state == constants.SECOND_FLIPPING_NONE_END_CORRECT or \
-                state == constants.SECOND_FLIPPING_NONE_END_WRONG or \
-                state == constants.INIT_STATE:
-            return "none"
-
-        elif state == constants.SECOND_FLIPPING_SUGGEST_RC_BEGIN_CORRECT or \
-                state == constants.SECOND_FLIPPING_SUGGEST_RC_BEGIN_WRONG or \
-                state == constants.SECOND_FLIPPING_SUGGEST_RC_MIDDLE_CORRECT or \
-                state == constants.SECOND_FLIPPING_SUGGEST_RC_MIDDLE_WRONG or \
-                state == constants.SECOND_FLIPPING_SUGGEST_RC_END_CORRECT or \
-                state == constants.SECOND_FLIPPING_SUGGEST_RC_END_WRONG:
-            return "row_column"
-
-        else:
-            return "card"
+                return constants.REWARD_SUGGEST_CARD * state_click

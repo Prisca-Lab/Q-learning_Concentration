@@ -1,0 +1,121 @@
+id_player;turn_number;position_clicked;time_until_match;suggestion_type;position_suggested;robot_type;match;game_ended
+12;1;[0, 0];0:1;none;none;faulty;False;False
+12;2;[0, 1];0:2;none;none;faulty;False;False
+12;3;[0, 2];0:3;none;none;faulty;False;False
+12;4;[0, 3];0:4;none;none;faulty;False;False
+12;5;[0, 4];0:5;none;none;faulty;False;False
+12;6;[0, 5];0:5;none;none;faulty;False;False
+12;7;[1, 0];0:6;none;none;faulty;False;False
+12;8;[2, 1];0:8;card;[2, 1];faulty;True;False
+12;9;[1, 1];0:2;none;none;faulty;False;False
+12;10;[2, 2];0:3;none;none;faulty;True;False
+12;11;[2, 3];0:1;none;none;faulty;False;False
+12;12;[1, 4];0:2;none;none;faulty;False;False
+12;13;[2, 4];0:3;none;none;faulty;False;False
+12;14;[1, 5];0:4;column;5;faulty;False;False
+12;15;[2, 4];0:4;card;[2, 4];faulty;False;False
+12;16;[3, 5];0:6;column;5;faulty;True;False
+12;17;[1, 5];0:2;none;none;faulty;False;False
+12;18;[2, 3];0:3;none;none;faulty;False;False
+12;19;[3, 1];0:4;none;none;faulty;False;False
+12;20;[1, 2];0:6;row;1;faulty;True;False
+12;21;[1, 3];0:1;none;none;faulty;False;False
+12;22;[0, 1];0:2;none;none;faulty;False;False
+12;23;[0, 3];0:4;none;none;faulty;False;False
+12;24;[0, 0];0:6;row;0;faulty;False;False
+12;25;[1, 4];0:6;card;[1, 4];faulty;False;False
+12;26;[3, 3];0:22;row;3;faulty;False;False
+12;27;[1, 3];0:24;card;[1, 3];faulty;False;False
+12;28;[0, 2];0:28;card;[0, 2];faulty;True;False
+12;29;[1, 4];0:2;none;none;faulty;False;False
+12;30;[3, 4];0:4;none;none;faulty;False;False
+12;31;[3, 3];0:4;none;none;faulty;False;False
+12;32;[1, 5];0:6;column;5;faulty;False;False
+12;33;[0, 5];0:8;card;[0, 5];faulty;False;False
+12;34;[2, 0];0:8;column;0;faulty;False;False
+12;35;[0, 4];0:10;card;[0, 4];faulty;False;False
+12;36;[2, 5];0:37;card;[2, 5];faulty;False;False
+12;37;[1, 5];0:38;none;none;faulty;False;False
+12;38;[0, 5];0:39;card;[0, 5];faulty;False;False
+12;39;[0, 4];0:42;none;none;faulty;False;False
+12;40;[0, 5];0:45;column;5;faulty;False;False
+12;41;[3, 4];0:47;card;[3, 4];faulty;False;False
+12;42;[0, 0];0:47;card;[0, 0];faulty;False;False
+12;43;[2, 0];0:48;none;none;faulty;False;False
+12;44;[3, 0];0:50;row;3;faulty;False;False
+12;45;[3, 3];0:52;card;[2, 5];faulty;False;False
+12;46;[2, 5];0:53;card;[1, 5];faulty;True;False
+12;47;[2, 0];0:1;none;none;faulty;False;False
+12;48;[3, 0];0:4;none;none;faulty;False;False
+12;49;[3, 2];0:4;none;none;faulty;False;False
+12;50;[1, 4];0:6;card;[1, 4];faulty;True;False
+12;51;[0, 5];0:1;none;none;faulty;False;False
+12;52;[0, 0];0:3;none;none;faulty;True;False
+12;53;[2, 0];0:1;none;none;faulty;False;False
+12;54;[0, 1];0:1;none;none;faulty;False;False
+12;55;[0, 3];0:2;none;none;faulty;False;False
+12;56;[0, 1];0:3;none;none;faulty;True;False
+12;57;[0, 4];0:1;none;none;faulty;False;False
+12;58;[1, 5];0:2;none;none;faulty;True;False
+12;59;[2, 3];0:1;none;none;faulty;False;False
+12;60;[2, 0];0:2;none;none;faulty;False;False
+12;61;[3, 0];0:2;none;none;faulty;False;False
+12;62;[2, 3];0:3;none;none;faulty;True;False
+12;63;[3, 4];0:0;none;none;faulty;False;False
+12;64;[2, 0];0:1;none;none;faulty;True;True
+12;1;[0, 0];0:2;none;none;faulty;False;False
+12;2;[0, 1];0:3;none;none;faulty;False;False
+12;3;[0, 2];0:3;none;none;faulty;False;False
+12;4;[0, 3];0:4;none;none;faulty;False;False
+12;5;[0, 4];0:4;none;none;faulty;False;False
+12;6;[0, 5];0:5;none;none;faulty;False;False
+12;7;[1, 0];0:6;none;none;faulty;False;False
+12;8;[1, 1];0:7;none;none;faulty;False;False
+12;9;[1, 2];0:8;row;1;faulty;False;False
+12;10;[3, 2];0:9;none;none;faulty;False;False
+12;11;[1, 3];0:10;card;[3, 2];faulty;False;False
+12;12;[2, 1];0:18;none;none;faulty;True;False
+12;13;[3, 2];0:3;column;1;faulty;False;False
+12;14;[2, 2];0:4;none;none;faulty;False;False
+12;15;[3, 3];0:5;none;none;faulty;False;False
+12;16;[2, 5];0:5;none;none;faulty;False;False
+12;17;[3, 5];0:8;card;[2, 5];faulty;False;False
+12;18;[0, 1];0:11;none;none;faulty;True;False
+12;19;[0, 2];0:2;row;0;faulty;False;False
+12;20;[3, 1];0:2;none;none;faulty;False;False
+12;21;[3, 2];0:3;none;none;faulty;False;False
+12;22;[0, 2];0:3;none;none;faulty;True;False
+12;23;[2, 3];0:1;row;0;faulty;False;False
+12;24;[1, 5];0:4;none;none;faulty;False;False
+12;25;[0, 0];0:5;none;none;faulty;False;False
+12;26;[3, 1];0:7;none;none;faulty;False;False
+12;27;[3, 1];0:11;card;[3, 1];faulty;False;False
+12;28;[3, 4];0:13;none;none;faulty;True;False
+12;29;[1, 2];0:3;card;[3, 4];faulty;False;False
+12;30;[2, 2];0:4;none;none;faulty;True;False
+12;31;[2, 3];0:1;none;none;faulty;False;False
+12;32;[1, 4];0:2;none;none;faulty;False;False
+12;33;[0, 5];0:3;none;none;faulty;False;False
+12;34;[1, 0];0:3;none;none;faulty;False;False
+12;35;[1, 4];0:5;card;[1, 1];faulty;False;False
+12;36;[0, 0];0:6;none;none;faulty;False;False
+12;37;[3, 3];0:8;column;0;faulty;False;False
+12;38;[2, 3];0:8;card;[3, 3];faulty;True;False
+12;39;[2, 4];0:1;column;3;faulty;False;False
+12;40;[1, 5];0:3;none;none;faulty;False;False
+12;41;[0, 4];0:3;none;none;faulty;False;False
+12;42;[1, 1];0:6;none;none;faulty;True;False
+12;43;[1, 4];0:1;row;1;faulty;False;False
+12;44;[0, 0];0:3;none;none;faulty;False;False
+12;45;[1, 0];0:4;none;none;faulty;False;False
+12;46;[1, 4];0:5;none;none;faulty;True;False
+12;47;[2, 4];0:0;column;4;faulty;False;False
+12;48;[1, 5];0:3;none;none;faulty;False;False
+12;49;[2, 5];0:3;none;none;faulty;False;False
+12;50;[0, 3];0:5;none;none;faulty;True;False
+12;51;[0, 5];0:0;none;none;faulty;False;False
+12;52;[1, 5];0:1;none;none;faulty;True;False
+12;53;[2, 4];0:1;none;none;faulty;False;False
+12;54;[2, 0];0:2;none;none;faulty;True;False
+12;55;[3, 0];0:0;none;none;faulty;False;False
+12;56;[0, 0];0:1;none;none;faulty;True;True

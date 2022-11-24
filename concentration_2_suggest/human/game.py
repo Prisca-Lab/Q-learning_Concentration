@@ -112,35 +112,23 @@ class Game:
 		
 		Example
 		-------
-		False match or first card of pair clicked:
-			json data: {
-				"clicked_card_name": clicked_card_name,
-				"clicked_card_position": clicked_card_position,
-				"n_face_up": face_up_cards,
-				"match": [
-					false,
-					0
-				]
-			}
-
-		If a pair has been found
-			json data: {
-				"clicked_card_name": clicked_card_name,
-				"clicked_card_position": clicked_card_position,
-				"n_face_up": face_up_cards,
-				"match": [
-					true,
-					num_of_match
-				]
+		json data: {
+			"open_card_name": clicked_card_name,
+    		"position": clicked_card_position,
+        	"pairs": pairs_found,
+        	"turn": turns,
+        	"match": is_match,
+        	"n_face_up": face_up_cards,
+        	"time_until_match": time_until_match,
 			}
 		"""
 
 		data = json.loads(clientSocket.recv(1024).decode())
 
-		clicked_card_name = data['data']['clicked_card_name']
-		clicked_card_position = data['data']['clicked_card_position']
-		face_up_cards = data['data']['n_face_up']
-		match = data['data']['match'][1]
+		clicked_card_name = data['game']['open_card_name']
+		clicked_card_position = data['game']['position']
+		face_up_cards = data['game']['n_face_up']
+		match = data['game']['match']
 
 		self._current_open_card_name = clicked_card_name
 		self._current_open_card_position = clicked_card_position
@@ -159,12 +147,12 @@ class Game:
 			player.set_number_of_clicks_for_current_pair += 1
 
 		if self._face_up_cards == 2:
-			player.set_last_pair_was_correct = True if data['data']['match'][0] else False
+			player.set_last_pair_was_correct = True if match else False
 
 			if player.get_last_pair_was_correct:
 				self._board[clicked_card_name]['founded'] = True
 				self._found_pairs += 1
-				player.set_pairs = data['data']['match'][1]
+				player.set_pairs = data['game']['pairs']
 
 			# now there is no face up card so current_open is empty
 			self._current_open_card_name = ''

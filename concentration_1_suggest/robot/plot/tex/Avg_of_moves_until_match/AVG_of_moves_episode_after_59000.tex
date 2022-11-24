@@ -1,0 +1,37 @@
+% This file was created with tikzplotlib v0.10.1.
+\begin{tikzpicture}
+
+\definecolor{darkgray176}{RGB}{176,176,176}
+\definecolor{steelblue31119180}{RGB}{31,119,180}
+
+\begin{axis}[
+tick align=outside,
+tick pos=left,
+title={Average click for each card (for episode)},
+x grid style={darkgray176},
+xlabel={Pairs},
+xmin=-0.55, xmax=11.55,
+xtick style={color=black},
+y grid style={darkgray176},
+ylabel={Number of clicks},
+ymin=1.22722415254237, ymax=7.22885211864407,
+ytick style={color=black}
+]
+\addplot [semithick, steelblue31119180, mark=*, mark size=3, mark options={solid}]
+table {%
+0 6.95605084745763
+1 3.15829661016949
+2 3.38756779661017
+3 3.09548305084746
+4 3.43217796610169
+5 3.39011016949153
+6 3.03072033898305
+7 2.74022881355932
+8 2.92377118644068
+9 2.39977118644068
+10 1.81095762711864
+11 1.50002542372881
+};
+\end{axis}
+
+\end{tikzpicture}

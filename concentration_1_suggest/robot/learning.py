@@ -80,7 +80,7 @@ def learning():
         state = constants.INIT_STATE
 
         # for each step of episode
-        while state_is_not_terminal():
+        while game.is_game_ended() is False:
             # Choose A from S using policy derived from Q (e.g., "epsilon-greedy")
             action = select_action(Q, state, epsilon)
 
@@ -124,10 +124,32 @@ def select_action(Q, state, epsilon):
     if is_pairs_zero or is_turn_odd:
         return constants.SUGGEST_NONE
     else:
-        if np.random.random() < epsilon:
-            return np.random.randint(3)
-        else:
-            return np.argmax(Q[state, :])
+        return epsilon_greedy(Q, state, epsilon)
+
+def epsilon_greedy(Q, state, epsilon):
+    if np.random.random() < epsilon:
+        return np.random.randint(3)
+    else:
+        return np.argmax(Q[state, :])
+
+def softmax_action(Q, state, temperature = 0.2):
+    prob = [0] * 3
+
+    den = 0
+    for i in range(3):
+        den += np.exp(Q[state, i]/temperature)
+
+    for i in range(3):
+        num = np.exp(Q[state, i]/temperature)
+        prob[i] = num/den
+    
+    action = np.random.choice([constants.SUGGEST_NONE, 
+                               constants.SUGGEST_ROW_COLUMN, 
+                               constants.SUGGEST_CARD], 
+                               p=prob)
+
+    return action
+
 
 def step(state, action):
     """
@@ -153,10 +175,6 @@ def step(state, action):
     logging.debug("Reward", reward, "\n")
 
     return next_state, reward
-
-
-def state_is_not_terminal():
-    return player.get_pairs != 12
 
 def get_new_epsilon(episode):
     START_EPSILON = 1.0   # Probability of random action

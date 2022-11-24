@@ -1,0 +1,37 @@
+% This file was created with tikzplotlib v0.10.1.
+\begin{tikzpicture}
+
+\definecolor{darkgray176}{RGB}{176,176,176}
+\definecolor{steelblue31119180}{RGB}{31,119,180}
+
+\begin{axis}[
+tick align=outside,
+tick pos=left,
+title={Average action provided by robot after 71000 episode},
+x grid style={darkgray176},
+xlabel={Pairs},
+xmin=-0.55, xmax=11.55,
+xtick style={color=black},
+y grid style={darkgray176},
+ylabel={Most suggested action},
+ymin=-0.0122139622922707, ymax=0.569450954616558,
+ytick style={color=black}
+]
+\addplot [semithick, steelblue31119180]
+table {%
+0 0.306189518191749
+1 0.542965845453735
+2 0.543011640211612
+3 0.529952087185142
+4 0.374757716450258
+5 0.369871276442038
+6 0.352529160618045
+7 0.322743297336808
+8 0.199279729103067
+9 0.174316419398292
+10 0.111435616476635
+11 0.0142253521126761
+};
+\end{axis}
+
+\end{tikzpicture}
