@@ -4,7 +4,7 @@ The project consists of a memory game in which the agent, using the Q-learning a
 This work is described in the following pubblication:
 **A.Andriella, G.Falcone, S. Rossi, "Enhancing Robot Assistive Behaviour with Reinforcement Learning and Theory of Mind", Submitted to IROS 2023**
 ## Project structure
-- ``One_flip`` is the folder which contains a first approach to the problem. In this the agent can help only on the second flip.
+- ``One_flip`` is the folder which contains a first approach to the problem. In this case the agent can help only on the second flip.
 - ``Both_flip`` is the folder in which the agent can suggest before and after the first flip. It's the main folder, which contains the Theory of Mind agent.
 ### Folders structure
 - ``human``: Contains the Flask application and web interface for the human player and the files to receive assistance by the agent. The ToM files are ``agent`` and ``player``.
