@@ -1,11 +1,8 @@
-
 import json
 import os
 import numpy as np
 import pandas as pd
 import csv
-
-import constants
 
 from pathlib import Path
 
@@ -41,19 +38,16 @@ class Util:
             np.save(matrix_file, Q)
 
     @staticmethod
-    def save_suggests_into_file(array_suggest, player_type, episode, is_game_ended):
+    def save_suggests_into_file(array_suggest, episode, is_game_ended):
         Util.__list_of_suggests_in_episode.append(list(array_suggest))
-        if player_type == "robot":
-            file_name = "hints" 
-        else: 
-            return
-            
+        file_name = "hints" 
+                    
         # if it's the first run then clean the file
         if episode == 0:
             open('../util/' + file_name + '.txt', 'w').close()
 
         # write the contents of list in a file every 4000 episode
-        if (player_type == "robot" and episode % 4000 == 0 and is_game_ended and episode != 0) or \
+        if (episode % 4000 == 0 and is_game_ended and episode != 0) or \
             (episode == 99999 and is_game_ended):
             Util.__write_on_file(file_name)
 
@@ -73,7 +67,6 @@ class Util:
                     Util.__episode += 1
         Util.__list_of_suggests_in_episode.clear()      
             
-
     @staticmethod
     def get_from_json_file(filename):
         with open("../util/" + filename + ".json", "r") as configfile:
@@ -103,78 +96,45 @@ class Util:
         return n
 
     @staticmethod
-    def create_directory_for_plots(user_type, user_number):
+    def create_directory_for_plots():
         """
         This function will create a directory for each stats to plot.
-        For each run, It will create a new directory for each user (only if user_type is the human player).
-        
-        Parameters:
-        ----------
-        user_type: int
-            0 it will create a directory for agent, it will create a directory for human otherwise
-        user_number: int
-            the number of the current player who will play for the first time.
-            This number will be the suffix of the folder, 
-            for example if it is 1 it will create the folder "user_1" in which the other folders for plots will be placed
-            It can be any number when user_type is 0.
         """
 
-        if user_type == 0:
-            # create directory if it doesn't exists
-            robot_path_plot = "../robot/plot"
-            if os.path.exists(robot_path_plot) is False:
-                os.mkdir(robot_path_plot)
+        # create directory if it doesn't exists
+        robot_path_plot = "../robot/plot"
+        if os.path.exists(robot_path_plot) is False:
+            os.mkdir(robot_path_plot)
 
-            robot_path_png = "../robot/plot/png"
-            if os.path.exists(robot_path_png):
-                return
-            os.mkdir(robot_path_png)
-            os.mkdir(robot_path_png + "/avg_of_suggests_in_specific_episode")
-            os.mkdir(robot_path_png + "/Avg_of_moves_until_match")
-            os.mkdir(robot_path_png + "/Avg_of_suggests_after_some_episode")
-            os.mkdir(robot_path_png + "/Episode_Click_until_match")
-            os.mkdir(robot_path_png + "/Rewards")
-            os.mkdir(robot_path_png + "/Episode_length")
-            os.mkdir(robot_path_png + "/Avg_of_suggests_on_first_card")
-            # tex file
-            robot_path_tex = "../robot/plot/tex"
-            if os.path.exists(robot_path_tex):
-                return
-            os.mkdir(robot_path_tex)
-            os.mkdir(robot_path_tex + "/avg_of_suggests_in_specific_episode")
-            os.mkdir(robot_path_tex + "/Avg_of_moves_until_match")
-            os.mkdir(robot_path_tex + "/Avg_of_suggests_after_some_episode")
-            os.mkdir(robot_path_tex + "/Episode_Click_until_match")
-            os.mkdir(robot_path_tex + "/Rewards")
-            os.mkdir(robot_path_tex + "/Episode_length")
-            os.mkdir(robot_path_tex + "/Avg_of_suggests_on_first_card")
+        # create png folder
+        robot_path_png = "../robot/plot/png"
+        if os.path.exists(robot_path_png):
+            return
+        os.mkdir(robot_path_png)
+        os.mkdir(robot_path_png + "/avg_of_suggests_in_specific_episode")
+        os.mkdir(robot_path_png + "/Avg_of_moves_until_match")
+        os.mkdir(robot_path_png + "/Avg_of_suggests_after_some_episode")
+        os.mkdir(robot_path_png + "/Episode_Click_until_match")
+        os.mkdir(robot_path_png + "/Rewards")
+        os.mkdir(robot_path_png + "/Episode_length")
+        os.mkdir(robot_path_png + "/Avg_of_suggests_on_first_card")
+        os.mkdir(robot_path_png + "/Mistakes")
+        os.mkdir(robot_path_png + "/Percent")
         
-        else:
-            # create parent directory
-            user_path_png_plot = "../human/plot"
-            if os.path.exists(user_path_png_plot) is False:
-                os.mkdir(user_path_png_plot)
-
-            user_path_png_parent = "../human/plot/user_" + str(user_number)
-            os.mkdir(user_path_png_parent)
-            user_path_png_child = "../human/plot/user_" + str(user_number) + "/png"
-            os.mkdir(user_path_png_child)
-            # create in parent directory a folder for plots
-            os.mkdir(user_path_png_child + "/Avg_of_suggests_in_specific_episode")
-            os.mkdir(user_path_png_child + "/Avg_of_moves_until_match")
-            os.mkdir(user_path_png_child + "/Avg_of_suggests_after_some_episode")
-            os.mkdir(user_path_png_child + "/Episode_Click_until_match")
-            os.mkdir(user_path_png_child + "/Rewards")
-            os.mkdir(user_path_png_child + "/Episode_length")
-            # for tex file
-            user_path_tex_child = "../human/plot/user_" + str(user_number) + "/tex"
-            os.mkdir(user_path_tex_child)
-            os.mkdir(user_path_tex_child + "/avg_of_suggests_in_specific_episode")
-            os.mkdir(user_path_tex_child + "/Avg_of_moves_until_match")
-            os.mkdir(user_path_tex_child + "/Avg_of_suggests_after_some_episode")
-            os.mkdir(user_path_tex_child + "/Episode_Click_until_match")
-            os.mkdir(user_path_tex_child + "/Rewards")
-            os.mkdir(user_path_tex_child + "/Episode_length")
+        # create pdf folder
+        robot_path_pdf = "../robot/plot/pdf"
+        if os.path.exists(robot_path_pdf):
+            return
+        os.mkdir(robot_path_pdf)
+        os.mkdir(robot_path_pdf + "/avg_of_suggests_in_specific_episode")
+        os.mkdir(robot_path_pdf + "/Avg_of_moves_until_match")
+        os.mkdir(robot_path_pdf + "/Avg_of_suggests_after_some_episode")
+        os.mkdir(robot_path_pdf + "/Episode_Click_until_match")
+        os.mkdir(robot_path_pdf + "/Rewards")
+        os.mkdir(robot_path_pdf + "/Episode_length")
+        os.mkdir(robot_path_pdf + "/Avg_of_suggests_on_first_card")
+        os.mkdir(robot_path_pdf + "/Mistakes")
+        os.mkdir(robot_path_pdf + "/Percent")
     
     @staticmethod
     def print_Q_table(Q, states, actions, module):

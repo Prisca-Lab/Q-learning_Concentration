@@ -4,7 +4,13 @@
 
 let baseCards = ['goose', 'koala', 'bird', 'tiger','panda','pelican','penguin','walrus', 'flamingo', 'shark', 'horse', 'duck'];
 
-let possibleCards = baseCards.concat(baseCards); // duplicate array items to make pairs
+//let possibleCards = baseCards.concat(baseCards); // duplicate array items to make pairs
+
+possibleCards = ['goose', 'bird', 'shark', 'tiger', 'koala', 'walrus',
+                 'tiger', 'pelican', 'penguin', 'panda', 'shark', 'walrus',
+                 'bird', 'goose', 'horse', 'horse', 'duck', 'flamingo',
+                 'duck', 'penguin', 'pelican', 'flamingo', 'panda', 'koala' 
+    ]
 
 // ============================================
 // Global Variables
@@ -41,7 +47,7 @@ const showStar = ['<li><i class="fa fa-star"></i></li><li><i class="fa fa-star-o
 // Send data to flask
 // ============================================
 function sendFlask(flag, data){
-  fetch('http://100.74.3.244:5000/', {
+  fetch('http://192.168.56.1:5000/', {
         headers : {
             'Content-Type': 'application/json',
             'Accept': 'application/json'
@@ -87,14 +93,16 @@ function checkFirstVisit() {
 function shuffle(array) {
     var currentIndex = array.length, temporaryValue, randomIndex;
 
-    while (currentIndex !== 0) {
+    /*while (currentIndex !== 0) {
         randomIndex = Math.floor(Math.random() * currentIndex);
         currentIndex -= 1;
         temporaryValue = array[currentIndex];
         array[currentIndex] = array[randomIndex];
         array[randomIndex] = temporaryValue;
-    }
-  
+    }*/
+
+    //alert(array)
+    
     return array;
 }
 
@@ -106,7 +114,7 @@ function shuffle(array) {
 // color the card suggested by robot
 function hintReceivedByRobot(){
     // sending a connect request to the server.
-    socket = io.connect('http://100.74.3.244:5000/');
+    socket = io.connect('http://192.168.56.1:5000/');
   
     socket.on('robot_hint', function(msg) {
         const obj = JSON.parse(msg);
@@ -151,7 +159,10 @@ function hintReceivedByRobot(){
 function initGame() {
     document.querySelector('.overlay').style.display = 'none';
     document.querySelector('.deck').innerHTML = '';
+    
     var array = shuffle(possibleCards);
+    
+    //alert(array)
     sendFlask("matrix", array);
 
     opened = []; 
@@ -261,7 +272,7 @@ function initGame() {
                     myMinutes = 0
                     mySeconds = 0
                 }
-            }, 10);
+            }, 500);
         });
     });
 };

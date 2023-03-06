@@ -3,58 +3,53 @@ import json
 from card import Card
 
 class Player:
-    def __init__(self):
-        self.reset()
+    def __init__(self, game):
+        """
+        Initialize the Player object.
+
+        Parameters:
+        ----------
+        game (Game): a Game object to associate with the player.
+
+        Attributes:
+        history (dict): A dictionary that tracks the player's card history.
+            The key is the name of the card, while the value is a dictionary with the following keys:
+                - card (str): the name of the card.
+                - first_pos (int): the number of times the first position of the card has been clicked.
+                - second_pos (int): the number of times the second position of the card has been clicked.
+        last_match (bool): True if the previous move was a match, False otherwise.
+        flip_number (int): The number of flip made by the player before they find a pair.
+        pairs_found (int): The number of pairs found by the player.
+        previous_card_name (str): The name of the card selected in the previous move.
+        """
+        self.game = game
+        self.history = {}
+        self.last_match = False
+        self.flip_number = 0
+        self.pairs_found = 0
+        self.previous_card_name = ''
 
     def reset(self):
-        self._pairs = 0
-        self._last_pair_was_correct = False
-        self._click_for_pair = 0
-        self._history = {}
-        self._previous_card_name = ''
+        """
+        Reset the player's attributes to their initial values.
+        """
+        self.game = None
+        self.history = {}
+        self.last_match = False
+        self.flip_number = 0
+        self.pairs_found = 0
+        self.previous_card_name = ''
 
-    @property
-    def get_pairs(self):
-        return self._pairs
-
-    @get_pairs.setter
-    def set_pairs(self, value):
-        self._pairs = value
-
-    @property
-    def get_last_pair_was_correct(self):
-        return self._last_pair_was_correct
-
-    @get_last_pair_was_correct.setter
-    def set_last_pair_was_correct(self, value):
-        self._last_pair_was_correct = value
-
-    @property
-    def get_number_of_clicks_for_current_pair(self):
-        return self._click_for_pair
-
-    @get_number_of_clicks_for_current_pair.setter
-    def set_number_of_clicks_for_current_pair(self, value):
-        self._click_for_pair = value
-
-    @property
-    def get_history(self):
-        return self._history
-
-    @get_history.setter
-    def set_history(self, value):
-        self._history = value
-
-
-    def create_history(self, shuffle_cards):
+    def create_history(self):
         k = 0
-        for i in range(4):
-            for j in range(6):
-                card = shuffle_cards[k]
-                if card in self._history:
-                    self._history[card]['second_pos'] = [i, j]
+        for i in range(self.game.num_rows):
+            for j in range(self.game.num_cols):
+                card = self.game.shuffled[k]
+
+                if card in self.history:
+                    self.history[card]['second_pos'] = [i, j]
                 else:
-                    self._history[card] = {
+                    self.history[card] = {
                         'first_pos': [i, j],          
                         'is_first_opened': False,           
                         'times_that_first_was_clicked': 0,  
@@ -65,35 +60,73 @@ class Player:
                     }
                 k += 1
 
+    def update_data_player(self, card, position, match):
+        """
+        This function modifies the player's data by updating their pair-finding progress and click counter.
 
-    def update_history(self, clicked_card_name, clicked_card_position, match, game):
-        if self._history[clicked_card_name]['first_pos'] == clicked_card_position:
+        Parameters:
+        -----------
+            card (str): The name of clicked card
+            position (tuple): The coordinates of clicked card
+            match (bool): A boolean value indicating whether the two flipped cards in the current turn form a matching pair.
+
+        Returns:
+        ----------
+            None
+        """
+
+        is_turn_even = (self.game.turns - 1) % 2 == 0
+
+        if self.last_match and is_turn_even is False:
+             self.flip_number = 1
+        else:
+             self.flip_number += 1
+        
+        if is_turn_even:
+            self.last_match = True if match else False
+
+            if self.last_match:
+                self.pairs_found += 1
+
+        self.__update_history(card, position, match)
+
+    def __update_history(self, clicked_card_name, clicked_card_position, match):
+        """
+        This method updates the history of the game with the information of the clicked card.
+
+        Parameters:
+        ----------
+            clicked_card_name (str): The name of the card that was clicked.
+            clicked_card_position (tuple): A tuple containing the row and column indices of the clicked card.
+            match (bool): A boolean value indicating whether the two flipped cards in the current turn form a matching pair.
+        """
+        is_turn_even = (self.game.turns - 1) % 2 == 0
+
+        if self.history[clicked_card_name]['first_pos'] == clicked_card_position:
             # update first location
-            self._history[clicked_card_name]['times_that_first_was_clicked'] += 1
-            self._history[clicked_card_name]['is_first_opened'] = True
+            self.history[clicked_card_name]['times_that_first_was_clicked'] += 1
+            self.history[clicked_card_name]['is_first_opened'] = True
             which_is_open = 'is_first_opened'
         else:
             # update first location
-            self._history[clicked_card_name]['times_that_second_was_clicked'] += 1
-            self._history[clicked_card_name]['is_second_opened'] = True
+            self.history[clicked_card_name]['times_that_second_was_clicked'] += 1
+            self.history[clicked_card_name]['is_second_opened'] = True
             which_is_open = 'is_second_opened'
 
-        is_turn_even = (game.get_turn - 1) % 2 == 0
-
         if match and is_turn_even:
-            self._history[clicked_card_name]['founded'] = True
+            self.history[clicked_card_name]['founded'] = True
 
         # after a move turn down previous card
         if is_turn_even:
-            which_flag = Card.get_which_is_open(self._previous_card_name, self._history)
-            self._history[self._previous_card_name][which_flag] = False
-            self._history[clicked_card_name][which_is_open] = False
-            self._previous_card_name = ''
+            which_flag = Card.get_which_is_open(self.previous_card_name, self.history)
+            self.history[self.previous_card_name][which_flag] = False
+            self.history[clicked_card_name][which_is_open] = False
+            self.previous_card_name = ''
 
-        self._previous_card_name = clicked_card_name
+        self.previous_card_name = clicked_card_name
 
     def print_history(self):
-        print(json.dumps(self._history, indent=4))
+        print(json.dumps(self.history, indent=4))
 
     
     def check_if_user_has_seen_a_card(self, suggested_card, suggested_position):
@@ -110,7 +143,7 @@ class Player:
             - 0 otherwise
         """
 
-        history = self._history
+        history = self.history
         # clicks of location to suggest
         clicks_of_card_to_open = 'times_that_second_was_clicked' if suggested_position == "is_first_opened" else "times_that_first_was_clicked"
         # clicks of location not suggested (regardless of whether it is face up or not)

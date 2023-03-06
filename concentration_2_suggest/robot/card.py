@@ -2,7 +2,6 @@ import random
 
 
 class Card:
-
     @staticmethod
     def get_random_card(available_cards):
         """
@@ -10,17 +9,13 @@ class Card:
 
         Parameters
         ----------
-        available_cards: dictionary
-            includes the name of the card and its available positions
+            available_cards (dict): includes the name of the card and its available positions
 
         Returns
         -------
-        card: string
-            the card name randomly chosen
-        position: array of int
-            coordinates of chosen card
-        which_one: string
-            which position was chosen: 'is_first_opened' for the first one, 'is_second_opened' otherwise
+            card (str): the card name randomly chosen
+            position (tuple): coordinates of chosen card
+            which_one (str): which position was chosen: 'is_first_opened' for the first one, 'is_second_opened' otherwise
         """
         # choose randomly a card from the list of available card
         card, position = random.choice(list(available_cards.items()))
@@ -52,16 +47,12 @@ class Card:
 
         Parameters
         ----------
-        board: dictionary
-            The board of the game.
+            board (dict): The board of the game.
 
         Returns
         -------
-        available_cards: dictionary
-            All name and coordinates of cards that can be clicked
-
+            available_cards (dict) All name and coordinates of cards that can be clicked
         """
-
         available_cards = {}
         for k, v in board.items():
             if board[k]['founded'] is False:
@@ -84,17 +75,13 @@ class Card:
 
         Parameters
         ----------
-        suggest: string
-            The robot suggest: row or column
-        number_suggested: int
-            The number of row/column suggested
-        history: dictionary
-            The history of game used to get all available cards of specific row/column 
+            suggest (str): the agent suggestion which can row or column
+            number_suggested (int): The number of row/column suggested
+            history (dict): The history of game used to get all available cards of specific row/column 
 
         Returns
         -------
-        available_cards: dictionary
-            A dictionary which contains all name and position that can be clicked
+            available_cards (dict): A dictionary which contains all name and position that can be clicked
         """
 
         hint = 0 if suggest == 'row' else 1
@@ -127,7 +114,18 @@ class Card:
     @staticmethod
     def get_other_location_of_open_card(card, board):
         """
-        Return the other position of a face up card
+        Return the other position of a face up card.
+
+        Parameters:
+        ----------
+        card (str): the card name which indicates the key of the board dict.
+        board (dict): the game board dictionary which contains the card name as key and the locations as values.
+
+        Returns:
+        ---------
+        tuple: 
+            the first element (tuple) indicates the card's location which is face down 
+            the second (str) is a flag which indicates if the first or second location
         """
 
         is_first_clicked = board[card]['is_first_opened']
@@ -135,7 +133,7 @@ class Card:
         first_pos = board[card]['first_pos']
         second_pos = board[card]['second_pos']
 
-        return second_pos if is_first_clicked else first_pos
+        return (second_pos, 'is_second_opened') if is_first_clicked else (first_pos, 'is_first_opened')
 
     @staticmethod
     def get_face_up_cards_by_index(index_type, index, board):
@@ -144,17 +142,13 @@ class Card:
 
         Parameters
         ---------- 
-        index_type: string
-            the row or the column
-        index: int
-            the index of the row / column for which you want to know the number of face up cards
-        board: dictionary
-            the history of player
+            index_type (str): the row or the column
+            index (int): the index of the row / column for which you want to know the number of face up cards
+            board (dict): the game board
 
         Returns
         -------
-        n: int
-            the number of face up cards 
+            A integer which indicates the number of face up cards 
         """
         n = 0
 

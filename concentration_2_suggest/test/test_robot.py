@@ -4,13 +4,13 @@ import sys, os
 sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'robot'))
 
 from agent import Agent
-from player import Player
-from game import Game
+from environment import Environment
 
 class RobotTestCase(unittest.TestCase):
 
     def setUp(self):
-        self.agent = Agent()
+        self.env = Environment()
+        self.agent = Agent(self.env)
         self.cards = {
             'flamingo': 
             {
@@ -37,55 +37,50 @@ class RobotTestCase(unittest.TestCase):
                 'founded': False
             }
         }
-        self.game = Game()
-        self.game.set_current_open_card_name = ''
-        self.game.set_board = self.cards    
-        self.player = Player()
-        self.player.set_last_pair_was_correct = True
-        self.player.set_number_of_clicks_for_current_pair = 6
-        self.player.set_history = self.cards
-
 
     def test_if_return_next_state_correctly(self):
-        SUGGEST_CARD = 2
-        SECOND_FLIPPING_SUGGEST_CARD_BEGIN_CORRECT = 31
-        face_up_cards = 1 
-        founded_pairs = 3 # begin
-        turn = 8
-        last_match = True 
-        next_state = self.agent.get_next_state(SUGGEST_CARD, face_up_cards, turn,
-                                               founded_pairs, last_match)
-        self.assertEqual(next_state, SECOND_FLIPPING_SUGGEST_CARD_BEGIN_CORRECT)
+        SUGGEST_CARD = 3
+        SUGG_CARD_BEG_S_CORRECT = 43
 
-
+        player = self.env.get_player()
+        player.pairs_found = 3
+        player.last_match = True
+        
+        game = self.env.get_game()
+        game.turns = 8
+        
+        next_state = self.agent.get_next_state(SUGGEST_CARD)
+        
+        self.assertEqual(next_state, SUGG_CARD_BEG_S_CORRECT)
     
     def test_checks_if_the_suggestion_provided_is_the_same_as_the_action_passed_as_the_argument(self):
-        ACTION_SUGGEST_CARD = 2
-        suggest, _, _ = self.agent.take_action(ACTION_SUGGEST_CARD, self.player, self.game)
+        ACTION_SUGGEST_CARD = 3
+        suggest, _, _ = self.agent.take_action(ACTION_SUGGEST_CARD)
         self.assertEqual("card", suggest)
 
-    
     def test_check_if_agent_suggest_other_position_of_most_clicked_card(self):
         # this is the suggestion on the first card
-        ACTION_SUGGEST_CARD = 2
-        suggest, card, position = self.agent.take_action(ACTION_SUGGEST_CARD, self.player, self.game)
+        ACTION_SUGGEST_CARD = 3
+        player = self.env.get_player()
+        player.history = self.cards
+        suggest, card, position = self.agent.take_action(ACTION_SUGGEST_CARD)
         self.assertEqual(position, [1, 3])
 
+    def test_if_reward_for_second_flip_is_correct(self):
+        player = self.env.get_player()
+        player.pairs_found = 4
+        player.flip_number = 6
+        player.last_match = True
 
-    def test_if_reward_is_correct(self):
-        clicks_until_match = self.player.get_number_of_clicks_for_current_pair
-        self.game.set_face_up_cards = 2
-        self.player.set_pairs = 4                       # middle state
-        SECOND_FLIPPING_SUGGEST_RC_MIDDLE_WRONG  = 28   # current state with last action RC
-        SUGGEST_ROW_COLUMN = 1                          # current action
-        REWARD_RC = 0.1
-        MIDDLE_STATE = 2
-
-        result = REWARD_RC * clicks_until_match * MIDDLE_STATE
+        game = self.env.get_game()
+        game.turns = 21                 # if it's the second flip, the turn is increased for the next turn, then it must be odd
         
-
-        reward = self.agent.get_reward(SECOND_FLIPPING_SUGGEST_RC_MIDDLE_WRONG, SUGGEST_ROW_COLUMN, 
-                                       self.player, self.game)
+        SUGGEST_ROW = 1          # current action
+        REWARD_ROW = 0.1
+        MIDDLE_STATE = 2
+        result = REWARD_ROW * 6 * MIDDLE_STATE
+        
+        reward = self.agent.get_reward(SUGGEST_ROW)
         
         self.assertEqual(reward, result)
 

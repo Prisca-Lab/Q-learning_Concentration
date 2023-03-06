@@ -3,99 +3,62 @@ import random
 from card import Card
 
 class Game:
+    # deck to be shuffled
     __cards = ['goose', 'koala', 'bird', 'tiger', 'panda', 'pelican',
                'penguin', 'walrus', 'flamingo', 'shark', 'horse', 'duck',
                'goose', 'koala', 'bird', 'tiger', 'panda', 'pelican',
                'penguin', 'walrus', 'flamingo', 'shark', 'horse', 'duck']
-
+    
     def __init__(self):
-        self.__reset()
-
-    def __reset(self):
-        self._face_up_cards = 0
-        self._current_open_card_name = ''
-        self._current_open_card_position = []
-        self._board = {}
-        self._turn = 1
-        self._found_pairs = 0
-
-    ##################################################################################################################
-    #                                             GETTER/SETTER                                                      #
-    ##################################################################################################################
-
-    @property
-    def get_face_up_cards(self):
-        return self._face_up_cards
-
-    @get_face_up_cards.setter
-    def set_face_up_cards(self, value):
-        self._face_up_cards = value
-
-    @property
-    def get_board(self):
-        return self._board
-
-    @get_board.setter
-    def set_board(self, value):
-        self._board = value
-
-    @property
-    def get_current_open_card_name(self):
-        return self._current_open_card_name
-
-    @get_current_open_card_name.setter
-    def set_current_open_card_name(self, value):
-        self._current_open_card_name = value
-
-    @property
-    def get_current_open_card_position(self):
-        return self._current_open_card_position
-
-    @get_current_open_card_position.setter
-    def set_current_open_card_position(self, value):
-        self._current_open_card_position = value
-
-    @property
-    def get_turn(self):
-        return self._turn
-
-    @get_turn.setter
-    def set_turn(self, value):
-        self._turn = value
-
-    ##################################################################################################################
-    #                                                 GAME                                                          #
-    ##################################################################################################################
-
-    def init_game(self, player):
         """
-        This function will create the game board and reinitialize data in order to reuse the same object.
+        This is the constructor method. It initializes the object with the following attributes:
+        shuffled - the array that contains the board's card shuffled
+        board - a dictionary with card name as key and positions and flags as value
+        turns - the number of turns played in the game
+        pairs_left - the number of pairs of cards remaining to be found
+        finished - a boolean indicating if the game has finished
+        current_open_card_name - the current open card in the game
+        current_open_card_position - the position of the current open card in the game
+        num_cols - the number of columns in the game board
+        num_rows - the number of rows in the game board
         """
+        self.shuffled = []
+        self.board = {}
+        self.turns = 1
+        self.pairs_left = 12
+        self.finished = False
+        self.current_open_card_name = ''
+        self.current_open_card_position = []
+        self.num_cols = 6
+        self.num_rows = 4
+        self.__create_board()
 
-        # in order to to play mulitple times reset player and game
-        if player.get_pairs == 12:
-            self.__reset()
-            player.reset()
+    def reset(self):
+        self.shuffled = []
+        self.board = {}
+        self.turns = 1
+        self.pairs_left = 12
+        self.finished = False
+        self.current_open_card_name = ''
+        self.current_open_card_position = []
+        self.num_cols = 6
+        self.num_rows = 4
+        self.__create_board()
 
-        shuffle_cards = random.sample(self.__cards, len(self.__cards))
-
-        self.__create_board(shuffle_cards)
-
-        player.create_history(shuffle_cards)
-
-    def __create_board(self, shuffle_cards):
+    def __create_board(self):
         """
         Create a new dictionary which contains the board data.
         """
+        self.shuffled = random.sample(self.__cards, len(self.__cards))
         
         k = 0
-        for i in range(4):
-            for j in range(6):
-                card = shuffle_cards[k]
-                if card in self._board:
-                    self._board[card]['second_pos'] = [i, j]
+        for i in range(self.num_rows):
+            for j in range(self.num_cols):
+                card = self.shuffled[k]
+                if card in self.board:
+                    self.board[card]['second_pos'] = [i, j]
                 else:
-                    self._board[card] = {
+                    self.board[card] = {
                         'first_pos': [i, j],        # the first location of a card
                         'is_first_opened': False,   # is the card currently face up?
                         'second_pos': [-1, -1],
@@ -105,95 +68,43 @@ class Game:
                 k += 1
 
     def __update_game(self, clicked_card_name, clicked_card_position, match, which_is_clicked):
-        is_turn_even = self._turn % 2 == 0
+        is_turn_even = self.turns % 2 == 0
 
         if is_turn_even:
             # click second card
-            previous_card = self._current_open_card_name  # it still contain the card's name opened in the previous turn
-            which_flag = Card.get_which_is_open(previous_card, self._board)
-            self._board[previous_card][which_flag] = False
-            self._face_up_cards = 2
-            self._current_open_card_name = ''
-            self._current_open_card_position = []
+            previous_card = self.current_open_card_name  # it still contain the card's name opened in the previous turn
+            which_flag = Card.get_which_is_open(previous_card, self.board)
+            self.board[previous_card][which_flag] = False
+            self.current_open_card_name = ''
+            self.current_open_card_position = []
         else:
             # click first card
-            self._face_up_cards = 1
-            self._current_open_card_name = clicked_card_name
-            self._current_open_card_position = clicked_card_position
-            self._board[clicked_card_name][which_is_clicked] = True
+            self.current_open_card_name = clicked_card_name
+            self.current_open_card_position = clicked_card_position
+            self.board[clicked_card_name][which_is_clicked] = True
 
         if is_turn_even and match:
-            self._board[clicked_card_name]['founded'] = True
-            self._found_pairs += 1
+            self.board[clicked_card_name]['founded'] = True
+            self.pairs_left -= 1
 
-        self._turn += 1
+        self.turns += 1
     
-    ##################################################################################################################
-    #                                                 MOVES                                                          #
-    ##################################################################################################################
-    
-    def make_move(self, player):
+    def make_move_by_card(self, card, position):
         """
-        This function will choose randomly a card from board.
+        This function makes a move based on the card that agent has suggested.
 
         Parameters:
         ----------
-        player: Player object
-            the current player who's playing
+            card (str): the name of the card suggested.
+            position (int): the position of the card clicked suggested.
 
         Returns:
         --------
-        random_card: String
-            name of chosen card
-        position: array of int
-            the coordinates of clicked card
-        which_is_clicked: String
-            'is_first_opened' if the card in first location has been clicked, 'is_second_opened' otherwise.
-        match: boolean
-            true if a pair was found, false otherwise.
+            A tuple containing the card name, position and whether it was a match (True/False).
         """
-
-        game_board = self._board
-        open_card_name = self._current_open_card_name
-
-        available_cards = Card.get_available_cards_and_position(game_board)
-        random_card, position, which_is_clicked = self.__select_card(available_cards, player)
-
-        # if it's second turn check if a pair has been found
-        match = self.__check_if_match(random_card, open_card_name)
-
-        # update game data
-        self.__update_game(random_card, position, match, which_is_clicked)
-
-        return random_card, position, which_is_clicked, match
-
-    def make_move_by_card(self, card, position):
-        """
-        This function will select the card suggested by the robot.
-
-        Parameters
-        ----------
-        card: String
-            the name of the card suggested which is also the card that will be clicked.
-        position: array of int
-            the coordinates of the card that should be clicked
-
-        Returns:
-        -------
-        card: String
-            name of chosen card
-        position: array of int
-            the coordinates of clicked card
-        which_is_clicked: String
-            which position was chosen: 'is_first_opened' for the first one, 'is_second_opened' otherwise
-        match: boolean
-            true if a pair has been found, false otherwise. 
-            Given that the card suggested is based on the card clicked in previous turn 
-            then it will be a certain match
-        """
-
-        game_board = self._board
-        open_card_name = self._current_open_card_name
+        # Get the current state of the game board and the name of the currently open card
+        game_board = self.board
+        open_card_name = self.current_open_card_name
 
         # in order to figure out which card's location has been face up
         which_is_clicked = Card.get_which_to_open(card, position, game_board)
@@ -204,37 +115,29 @@ class Game:
         # update game data
         self.__update_game(card, position, match, which_is_clicked)
 
-        return card, position, which_is_clicked, match
+        return (card, position, match)
 
     def make_move_by_grid(self, suggest, number_suggested):
         """
-        This function will select randomly a card based on row or column suggest.
+        Makes a move in the game based on a suggestion of a row or column and a number in that row or column.
 
-        Parameters
+        Parameters:
         ----------
-        type_of_suggest: String
-            'row' or 'column' suggest.
-        number_suggested: int
-            The number of the row or column in which a card should be clicked
+            suggest (str): A string indicating whether the suggestion is for a row or column.
+            number_suggested (int): The number of the row or column suggested.
 
         Returns:
-        -------
-        card: String
-            name of chosen card
-        position: array of int
-            the coordinates of clicked card
-        which_is_clicked: String
-            which position was chosen: 'is_first_opened' for the first one, 'is_second_opened' otherwise
-        match: boolean
-            true if a pair has been found, false otherwise. 
-            Given that the card suggested is based on the card clicked in previous turn 
-            then it will be a certain match
+        ---------
+            tuple: A tuple containing the card selected, its position on the game board, and a boolean indicating whether it matches with the currently open card.
         """
 
-        game_board = self._board
-        open_card_name = self._current_open_card_name
+        # Get the current state of the game board and the name of the currently open card
+        game_board = self.board
+        open_card_name = self.current_open_card_name
 
+        # Get the available cards to select from based on the suggestion and number suggested
         available_cards = Card.get_available_cards_by_suggest(suggest, number_suggested, game_board)
+        # Select a random card from the available cards and get its position on the game board and which location was clicked
         random_card, position, which_is_clicked = Card.get_random_card(available_cards)
 
         # if there is already an open card then check if it is a match, false otherwise
@@ -243,67 +146,83 @@ class Game:
         else:
             match = False
 
-        # update game data
+        # Update the game data with the selected card, its position, whether it matches, and which location was clicked
         self.__update_game(random_card, position, match, which_is_clicked)
 
-        return random_card, position, which_is_clicked, match
+        return (random_card, position, match)
 
-    ##################################################################################################################
-    #                                                   UTIL                                                         #
-    ##################################################################################################################
-
-    def __select_card(self, available_cards, player):
+    def select_card(self, pairs_found, click_before_match):
         """
-        This function will choose a card based on probability condition.
+        This function selects a card to play based on the number of pairs already found and the number of clicks 
+        made since the last match. It calculates the probability of making a match and chooses a card randomly 
+        or based on the probability calculated.
 
         Parameters:
         ----------
-        available_cards: dictionary
-            the set of cards
-        player: Player 
-            the current player who's playing the game
+            pairs_found (int): The number of pairs already found.
+            click_before_match (int): The number of clicks made since the last match.
 
         Returns:
-        --------
-        random_card: String
-            name of chosen card
-        position: array of int
-            the coordinates of clicked card
-        which_is_clicked: String
-            'is_first_opened' if the card in first location has been clicked, 'is_second_opened' otherwise.
+        ---------
+            tuple: A tuple containing the name of the card, the position of the card, and a boolean value indicating 
+            whether the card is a match or not.
         """
+        pairs_to_found = 12 - pairs_found
+        is_turn_even = self.turns % 2 == 0
 
-        # get player's data 
-        face_up_cards = self._face_up_cards
-        founded_pairs = player.get_pairs
-        number_of_click_for_pair = player.get_number_of_clicks_for_current_pair # it considers turns, not moves
-        pairs_to_found = 12 - founded_pairs
-
-        # get probability
+        # Calculate the probability of not making a match after a certain number of clicks
         probability_of_no_match = (1 - 1 / (2 * pairs_to_found - 1))
-        probability_of_no_match_after_n_clicks = pow(probability_of_no_match, number_of_click_for_pair)
+        probability_of_no_match_after_n_clicks = pow(probability_of_no_match, click_before_match)
         probability_of_match = (1 - probability_of_no_match_after_n_clicks) * 100
 
-        # if probability is increase then robot will choose correct card, otherwise the card will be choose randomly.
-        if face_up_cards == 1 and probability_of_match > 50:
-            
-            if random.randint(0, 1) == 1:
-                random_card = self._current_open_card_name
-                position = Card.get_other_location_of_open_card(random_card, self._board)
-                if self._board[random_card]['is_first_opened']:
-                    which_is_clicked = 'is_second_opened'
-                else:
-                    which_is_clicked = 'is_first_opened'
-                return random_card, position, which_is_clicked
+        # If the current turn is even and the probability of making a match is greater than 50%, 
+        # the robot chooses the card that allows it to make a match
+        # N.B after a match the counter is not zero yet, but since we check if the turn is even we don't have any problem
+        # In order to have a player with perfect memory decrease probability and remove the randint check
+        if is_turn_even and probability_of_match > 50 and random.randint(0, 1) == 1:
+            random_card = self.current_open_card_name
+            position, which_is_clicked = Card.get_other_location_of_open_card(random_card, self.board)
+            self.__update_game(random_card, position, True, which_is_clicked)
+            return (random_card, position, True)
 
-        # if result of random.randint is not 1 then choose randomly a card
+        # Random otherwise
+        available_cards = Card.get_available_cards_and_position(self.board)
         random_card, position, which_is_clicked = Card.get_random_card(available_cards)
+        match = self.__check_if_match(random_card, self.current_open_card_name)
+        self.__update_game(random_card, position, match, which_is_clicked)
 
-        return random_card, position, which_is_clicked
+        return random_card, position, match
 
     @staticmethod
     def __check_if_match(first_card, second_card):
         return True if first_card == second_card else False
 
     def is_game_ended(self):
-        return self._found_pairs == 12
+        return self.pairs_left == 0
+
+    def get_least_clicked_location_of_most_clicked_pair(self, history):
+        """
+        This function will find the most clicked card. Then it will returns the least clicked location of that card.
+
+        Parameters:
+        ----------
+            history (dict): the player's history which contains the card name as key, and the 
+            locations and how many times they have clicked as values.
+
+        Returns:
+        ---------
+            tuple: a tuple containing the name of the card and another tuple which contains the coordinates of the least clicked location
+        """
+
+        card = Card()
+        # get all most clicked cards
+        available_cards = card.get_most_clicked_cards(history)
+        # choose randomly one of them
+        card_name, other_pos, which_is_clicked = Card.get_random_card(available_cards)
+        # get least clicked location of chosen card
+        if which_is_clicked == 'is_first_opened':
+            other_pos = history[card_name]['second_pos']
+        else:
+            other_pos = history[card_name]['first_pos']
+
+        return card_name, other_pos

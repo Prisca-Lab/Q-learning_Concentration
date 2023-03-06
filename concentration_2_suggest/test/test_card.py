@@ -215,7 +215,7 @@ class CardTestCase(unittest.TestCase):
             }
         }
 
-        position = Card.get_other_location_of_open_card('flamingo', dict)
+        position, _ = Card.get_other_location_of_open_card('flamingo', dict)
         self.assertEqual(position, [1, 3])
 
 
