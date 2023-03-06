@@ -46,7 +46,7 @@ In the human directory:
   4. run the agent 
   
   ```bash
-  py main.py
+  py play.py
   ```
   5. Access to the following address to play the game with UI helped by the robot
   
