@@ -15,6 +15,9 @@ from util import Util
 
 # in order to have a different directory of plots for each user who's gonna play
 user_number = Util.get_user_number()
+user_parent_path = "../human/plot"
+if not os.path.exists(user_parent_path):
+    os.mkdir(user_parent_path)
 user_path = "../human/plot/user_" + str(user_number)
 os.mkdir(user_path)
 
