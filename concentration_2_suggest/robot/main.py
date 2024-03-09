@@ -1,15 +1,15 @@
 import numpy as np
 
-from learning import Qlearning
-from environment import Environment
-
 import sys
 import os
 sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'util'))
 
-import constants
-from plotting import Plotting
+from learning.learning import Qlearning
+from game.environment import Environment
+
+from util import constants
 from util import Util
+from plotting import Plotting
 
 # define robot's action
 actions = ['none', 'suggest_row', 'suggest_col', 'suggest_card']

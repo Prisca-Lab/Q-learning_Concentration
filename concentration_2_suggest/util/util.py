@@ -3,8 +3,15 @@ import os
 import numpy as np
 import pandas as pd
 import csv
+import requests
 
+from socket import *
 from pathlib import Path
+
+import sys
+sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'util'))
+
+import constants
 
 class Util:
     __list_of_suggests_in_episode = []  # in order to write the suggestions in a file
@@ -82,23 +89,32 @@ class Util:
         return Q
 
     @staticmethod
-    def get_user_number():
+    def get_user_number(update=True):
         """
-        This function will return the number of user who have played.
-        It will update the number and it will write on the file.
+        This function returns the number of users who have played.
+        It can optionally update the number and write it to the file.
+
+        Parameters:
+        - update (bool): If True, update the user number and write it to the file.
+                        If False, read and return the value without updating it.
+
+        Returns:
+        - n (int): The number of users who have played.
         """
         with open('../util/user_number.txt', 'r+') as f:
-            n = int(f.read()) + 1
-            f.seek(0)
-            f.write(str(n))
-            f.truncate()
+            n = int(f.read())
+            if update:
+                n += 1
+                f.seek(0)
+                f.write(str(n))
+                f.truncate()
 
         return n
 
     @staticmethod
     def create_directory_for_plots():
         """
-        This function will create a directory for each stats to plot.
+        This function will create a directory for each stats to plot. (training part)
         """
 
         # create directory if it doesn't exists
@@ -145,9 +161,8 @@ class Util:
 
     @staticmethod
     def put_data_in_csv(csv_data, id_player):
-        file_path = Path("../human/plot/user_" + str(id_player) + "/game_data.csv")
+        file_path = Path("../human/data/user_" + str(id_player) + "/game_data.csv")
         keys = csv_data.keys()
-        print("keys:", keys)
 
         if file_path.is_file() is False:
             # add header
@@ -161,3 +176,121 @@ class Util:
             with open(file_path, "a+", newline='') as outfile:
                 writer = csv.writer(outfile, delimiter = ";")
                 writer.writerows(list(zip(*[csv_data[key] for key in keys])))
+
+    @staticmethod
+    def update_log_file(data, id_player):
+        if id_player == -1:
+            return 
+        
+        file_path = Path("../human/data/user_" + str(id_player) + "/log_file.txt")
+        with open(file_path, "a+", newline='') as outfile:
+            outfile.write(data)
+
+    @staticmethod
+    def get_experimental_condition(experimental_condition):
+        types = {
+            constants.TOM: "tom",
+            constants.NO_TOM: "no_tom",
+            constants.DECEPTION: "deception",
+        }
+        return types.get(experimental_condition, "Unknown")
+    
+    @staticmethod
+    def close_connection(SERVER_IP, client_socket, ID_PLAYER):
+        json_data = { "connection": "close" }
+        requests.post("http://" + SERVER_IP + ":5000/exit/" + str(ID_PLAYER), json=json_data)
+        client_socket.close()
+        Util.formatted_debug_message("Client closed!", level='INFO')
+
+    @staticmethod
+    def create_dir_for_current_user():
+        """
+        This function will create a directory for the user who has to play the game.
+        Returns the user ID if success.
+        """
+        # Check if the 'data' directory exists
+        data_dir = "../human/data"
+        if not os.path.exists(data_dir):
+            try:
+                os.makedirs(data_dir)
+                Util.formatted_debug_message("The 'data' directory has been created!", level='INFO')
+            except OSError as e:
+                print(f"Error during the creation of the 'data' directory: {e}")
+
+        # get current user ID
+        user_number = Util.get_user_number()
+        # path for the current user
+        user_path = "../human/data/user_" + str(user_number)
+        # create the directory
+        try:
+            if not os.path.exists(user_path):
+                os.makedirs(user_path)
+            else:
+                print("The directory already exists!")
+        except OSError as e:
+            print(f"Error during the creation of directory: {e}")
+
+        return user_number
+
+    @staticmethod
+    def connect_to_server(server_name, server_port):
+        client_socket = socket(AF_INET, SOCK_STREAM) 
+        connected = False
+        while not connected:
+            try:
+                # connect socket to remote server at (serverName, serverPort)
+                client_socket.connect((server_name, server_port))
+                connected = True
+            except Exception as e:
+                print("catch exception: ", e)
+        Util.formatted_debug_message("Connected to: " + str(client_socket.getsockname()), level='INFO')
+
+        return client_socket
+    
+    @staticmethod
+    def formatted_debug_message(message, level='INFO'):
+        """
+        Formats a debug message with visual delimiters and log level labels.
+
+        Args:
+            - message (str): The message to format.
+            - level (str): The log level of the message (default: 'INFO').
+        """
+        delimiter = "*" * 60
+        print(f"{delimiter}\n[{level}] {message}\n{delimiter}")
+
+    @staticmethod
+    def get_argv_param(argv):
+        """"
+        Gets parameters from the command line.
+
+        Args:
+            argv (list): List of command line arguments.
+
+        Returns:
+            tuple: A tuple containing the player ID and the experimental condition.
+                The player ID is an integer, while the experimental condition
+                is an integer ranging from 0 to 5. If no experimental condition is specified,
+                the value will be None.
+        """
+        ID_PLAYER = None
+        EXPERIMENTAL_CONDITION = None
+
+        # get data from command line
+        n_args = len(sys.argv)
+
+        if n_args >= 2:
+            if sys.argv[1] == "true":
+                ID_PLAYER = Util.get_user_number(False)
+                Util.formatted_debug_message("Directory already created for player " + str(ID_PLAYER) + "!", level='INFO')
+            else:  
+                if int(sys.argv[1]) in [0, 1, 2]:
+                    EXPERIMENTAL_CONDITION = int(sys.argv[1])
+                
+                ID_PLAYER = Util.create_dir_for_current_user()
+                Util.formatted_debug_message("Created directory for player " + str(ID_PLAYER) + "!", level='INFO')       
+        else:
+            ID_PLAYER = Util.create_dir_for_current_user()
+            Util.formatted_debug_message("Created directory for player " + str(ID_PLAYER) + "!", level='INFO')
+
+        return ID_PLAYER, EXPERIMENTAL_CONDITION
