@@ -4,7 +4,6 @@ The project consists of a memory game in which the agent, using the Q-learning a
 ## Project structure
 - ``concentration_1_suggest`` is the folder which contains a first approach to the problem. In this case the agent can help only on the second flip.
 - ``concentration_2_suggest`` is the folder in which the agent can suggest before and after the first flip. It's the main folder, which contains the Theory of Mind agent.
-- ``deception`` is the folder in which the agent can deceive using only three action. Experimental condition included are **Superficial**, **External** and **Hidden**.
 ## Installation instructions
 ```bash
 pip install -r requirements.txt
