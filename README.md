@@ -1,8 +1,6 @@
 # Q-learning_Concentration
 The project consists of a memory game in which the agent, using the Q-learning algorithm, learns how to provide assistance to the user. Once it learns the optimal policy it uses Theory of Mind to provide more targeted and useful assistance.
 
-This work is described in the following pubblication:
-**A.Andriella, G.Falcone, S. Rossi, "Enhancing Robot Assistive Behaviour with Reinforcement Learning and Theory of Mind", Submitted to IROS 2023**
 ## Project structure
 - ``concentration_1_suggest`` is the folder which contains a first approach to the problem. In this case the agent can help only on the second flip.
 - ``concentration_2_suggest`` is the folder in which the agent can suggest before and after the first flip. It's the main folder, which contains the Theory of Mind agent.
